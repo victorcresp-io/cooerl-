@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Baixar Excel</title>
+    <style>
+        /* Estilos gerais */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f7fc;
+            text-align: center;
+            padding: 50px;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        .btn-download {
+            padding: 15px 30px;
+            background-color: #28a745;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .btn-download:hover {
+            background-color: #218838;
+        }
+
+        .btn-download i {
+            margin-right: 8px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Clique abaixo para baixar o arquivo Excel</h1>
+
+    <a href="{{ url_for('siga.excel') }}" class="btn-download">
+        Baixar Excel
+    </a>
+
+</body>
+</html>

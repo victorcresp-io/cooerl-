@@ -1,6 +1,6 @@
 import os
-from . import db
-from . import auth
+from my_app import db
+from my_app import bp_fornecedores
 from flask import Flask
 
 
@@ -33,7 +33,7 @@ def create_app(test_config = None):
     
      
     db.init_app(app)
-    app.register_blueprint(auth.bp, url_prefix = '/teste')
+    app.register_blueprint(bp_fornecedores.bp, url_prefix = '/siga')
     print("Blueprint 'auth' registrado com sucesso!")
 
 
@@ -41,3 +41,5 @@ def create_app(test_config = None):
     return app
 
 
+if __name__ == '__main__':
+    create_app()

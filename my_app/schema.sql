@@ -1,18 +1,21 @@
 DROP TABLE IF EXISTS user;
 DROP TABLE IF EXISTS post;
+DROP TABLE IF EXISTS fornecedores;
+DROP TABLE IF EXISTS minha_tabela;
 
-CREATE TABLE user(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    username TEXT UNIQUE NOT NULL,
-    password TEXT NOT NULL
+
+CREATE TABLE fornecedores (
+    fornecedor TEXT NOT NULL,
+    cpf_cnpj VARCHAR(18),
+    crc CHAR(3),
+    tipo_empresarial TEXT,
+    me_epp CHAR(3),
+    situacao VARCHAR(40),
+    data_cadastro DATETIME,
+    cidade VARCHAR(40),
+    UF CHAR(2)
 );
 
-CREATE TABLE post(
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    author_id INTEGER NOT NULL,
-    created TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    title TEXT NOT NULL,
-    body TEXT NOT NULL,
-    FOREIGN KEY (author_id) REFERENCES user(id)
-);
+
+
 
