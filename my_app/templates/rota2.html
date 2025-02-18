@@ -43,7 +43,7 @@
 <body>
     <h1>Clique abaixo para baixar o arquivo Excel</h1>
 
-    <a href="{{ url_for('siga.excel') }}" class="btn-download">
+    <a href="{{ url_for('siga.excel_download', filtro = filtro, tipo = tipo) }}" class="btn-download">
         Baixar Excel
     </a>
 
