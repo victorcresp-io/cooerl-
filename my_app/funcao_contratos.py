@@ -56,6 +56,10 @@ def alterar_colunas_fornecedores(df):
     print(df.info())
     return df
 
+def tratar_ids(df):
+   df['ID Processo'] = pd.to_numeric(df['ID Processo'], errors = 'coerce').fillna(0).astype(int)
+   df['ID Processo'] = pd.to_numeric(df['ID Processo'], errors = 'coerce').fillna(0).astype(int)
+   return df
 
 def tratar_contratos(df): # Função para tratamento da tabela FORNECEDORES.
     df.drop('data_extracao', axis = 1, inplace = True)

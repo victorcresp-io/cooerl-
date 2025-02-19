@@ -9,6 +9,21 @@
 <body>
     <div class="form-container">
         <h2>Preencha o Formulário</h2>
+<!-- Exibir as mensagens de flash (se existirem) -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        <ul>
+            {% for category, message in messages %}
+                <li class="flash-message {% if category == 'error' %} error-message {% else %} success-message {% endif %}">
+                    {{ message }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endwith %}
+
+
+        <!-- Formulário de envio -->
         <form action="{{url_for('siga.rota1', _external=True)}}" method="POST">
             <label for="nome">Nome:</label>
             <input type="text" id="nome" name="empresa" placeholder="Digite o nome da empresa">

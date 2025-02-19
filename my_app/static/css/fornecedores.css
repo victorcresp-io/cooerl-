@@ -104,3 +104,16 @@ button[type="submit"]:hover {
         font-size: 22px;
     }
 }
+
+/* Adicione ao seu arquivo CSS */
+.flash-message {
+    font-weight: bold;
+}
+
+.error-message {
+    color: red;
+}
+
+.success-message {
+    color: green;
+}
