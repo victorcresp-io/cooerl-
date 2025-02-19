@@ -6,6 +6,10 @@ from io import BytesIO
 
 bp = Blueprint('siga', __name__)
 
+@bp.route('/')
+def rota():
+    return 'oi'
+
 @bp.route('/rota1', methods=['GET', 'POST'])
 def rota1():
     """ Rota para processar a requisição e redirecionar para o download """
