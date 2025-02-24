@@ -23,18 +23,29 @@ def rota1():
         db = get_db()
         cursor = db.cursor()
         try: 
-            cursor.execute('SELECT COUNT(*) FROM fornecedores WHERE fornecedor == ?', (empresa,))
+
+            cursor.execute('SELECT fornecedor, cpf_cnpj FROM fornecedores WHERE fornecedor = ? OR cpf_cnpj = ?', (empresa, cnpj))
             resultado = cursor.fetchone()
-            if resultado[0] == 0:
-                flash('Empresa nao encontrada', 'error')
+
+            if not resultado:
+                flash('Empresa não encontrada', 'error')
                 return redirect(url_for('siga.rota1'))
-        except Exception as e: 
+            
+            empresa_db, cnpj_db = resultado
+
+
+            if empresa and empresa != empresa_db:
+                flash('Empresa fornecida não corresponde ao CNPJ informado', 'error')
+                return redirect(url_for('siga.rota1'))
+            
+            if cnpj and cnpj != cnpj_db: 
+                flash('CNPJ fornecido não corresponde a empresa informada', 'error')
+                return redirect(url_for('siga.rota1'))
+            
+        except Exception as e:
             flash(f'Ocorreu um erro: {str(e)}', 'error')
-            return render_template('siga.rota1')
-        
-        if not empresa and not cnpj:
-            flash('preencha', 'error')
-            return render_template('fornecedores.html', error="É preciso preencher pelo menos um campo.")
+            return redirect(url_for('siga.rota1'))
+
 
         # Armazenamos apenas os filtros na URL para buscar os dados no download
         if cnpj:

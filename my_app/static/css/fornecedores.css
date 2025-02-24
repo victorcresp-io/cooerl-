@@ -27,6 +27,12 @@ h2 {
     font-weight: bold;
 }
 
+ul {
+    list-style-type: none;
+    text-align: center;
+    padding-left: 0;
+}
+
 form {
     width: 100%;
 }
@@ -117,3 +123,4 @@ button[type="submit"]:hover {
 .success-message {
     color: green;
 }
+
