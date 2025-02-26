@@ -1,5 +1,6 @@
+/* Estilos gerais */
 body {
-    font-family: 'Arial', sans-serif;
+    font-family: Arial, sans-serif;
     background: linear-gradient(to bottom, #f0f0f0, #d3d3d3);
     margin: 0;
     padding: 0;
@@ -9,13 +10,18 @@ body {
     min-height: 100vh;
 }
 
+.container {
+    width: 100%;
+    max-width: 960px;
+    margin: 20px auto;
+}
+
+/* Formulário */
 .form-container {
     background-color: white;
     padding: 25px;
     border-radius: 12px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-    width: 100%;
-    max-width: 420px;
     text-align: center;
 }
 
@@ -25,16 +31,6 @@ h2 {
     margin-bottom: 20px;
     font-size: 24px;
     font-weight: bold;
-}
-
-ul {
-    list-style-type: none;
-    text-align: center;
-    padding-left: 0;
-}
-
-form {
-    width: 100%;
 }
 
 label {
@@ -52,75 +48,119 @@ input[type="text"] {
     border: 1px solid #ccc;
     border-radius: 6px;
     font-size: 16px;
-    box-sizing: border-box; /* Mantém a largura correta mesmo com padding */
-}
-
-input[type="text"]:focus {
-    border-color: #0056b3;
-    outline: none;
-    box-shadow: 0 0 5px rgba(0, 86, 179, 0.2);
-}
-
-button[type="submit"], .back-button {
-    width: 100%;
-    padding: 12px;
-    border: none;
-    border-radius: 6px;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    margin-bottom: 10px;
-    box-sizing: border-box; /* Garante alinhamento correto */
+    box-sizing: border-box;
 }
 
 button[type="submit"] {
+    width: 100%;
+    padding: 12px;
     background-color: #0056b3;
     color: white;
-    box-shadow: 0 2px 5px rgba(0, 86, 179, 0.3);
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
 }
 
 button[type="submit"]:hover {
     background-color: #004080;
-    transform: translateY(-2px);
 }
 
 .back-button {
-    background-color: #555;
-    color: white;
-    text-decoration: none;
+    width: 100%;
     display: block;
     text-align: center;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    box-sizing: border-box;
+    background-color: #555;
+    color: white;
+    padding: 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    margin-top: 10px;
 }
 
 .back-button:hover {
     background-color: #444;
-    transform: translateY(-2px);
 }
 
-/* Responsividade */
-@media (max-width: 600px) {
-    .form-container {
-        width: 90%;
-        padding: 20px;
-    }
-
-    h2 {
-        font-size: 22px;
-    }
+/* Mensagens de erro e sucesso */
+ul {
+    list-style-type: none;
+    padding-left: 0;
+    text-align: center;
 }
 
-/* Adicione ao seu arquivo CSS */
 .flash-message {
     font-weight: bold;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 6px;
+    display: inline-block;
+    width: 100%;
+    max-width: 400px;
 }
 
 .error-message {
-    color: red;
+    background-color: #f8d7da;
+    color: #721c24;
 }
 
 .success-message {
-    color: green;
+    background-color: #d4edda;
+    color: #155724;
 }
 
+/* Resumo da empresa */
+.resumo-container {
+    margin-top: 20px;
+    background-color: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+#resumo-box {
+    display: block;
+}
+
+button.close-btn {
+    background-color: transparent;
+    border: none;
+    color: #333;
+    font-size: 20px;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+}
+
+button.close-btn:hover {
+    color: #c82333;
+}
+
+.resumo-content p {
+    font-size: 16px;
+    margin: 10px 0;
+}
+
+
+
+.download-container {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.btn-download {
+    padding: 12px 30px;
+    background-color: #28a745;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.btn-download:hover {
+    background-color: #218838;
+}

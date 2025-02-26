@@ -58,3 +58,21 @@ CREATE TABLE IF NOT EXISTS compras_diretas (
     unidade_medida TEXT
 );
 
+CREATE TABLE IF NOT EXISTS outras_compras ( 
+    unidade TEXT,
+    id_processo INT,
+    processo TEXT,
+    objeto TEXT,
+    afastamento TEXT,
+    enquadramento_legal TEXT,
+    data_aprovacao DATETIME,
+    valor_processo FLOAT,
+    cpf_cnpj VARCHAR(18),
+    fornecedor_vencedor TEXT,
+    id_item INT,
+    item TEXT,
+    quantidade INT,
+    valor_unitario FLOAT,
+    regime TEXT,
+    unidade_medida TEXT
+);

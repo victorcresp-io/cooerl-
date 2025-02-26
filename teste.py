@@ -7,7 +7,7 @@ conn = sqlite3.connect(r'C:\Users\victor.crespo\Downloads\cooerl\instance\flaskr
 cursor = conn.cursor()
 tabela =  'contratos'
 # Consulta com o parâmetro, utilizando um placeholder
-cursor.execute('PRAGMA table_info(fornecedores)')
+cursor.execute('SELECT * FROM compras_diretas')
 
 # Obter os dados retornados pela consulta
 dados = cursor.fetchall()
@@ -19,10 +19,6 @@ colunas = [desc[0] for desc in cursor.description]
 resultado = [dict(zip(colunas, row)) for row in dados]
 
 # Exibir o resultado
-print(resultado)
-
+print(resultado) 
 # Fechar a conexão
 conn.close()
-
-
-

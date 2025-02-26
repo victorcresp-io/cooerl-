@@ -14,7 +14,7 @@ caminho_compras_diretas = r'C:\Users\victor.crespo\Downloads\cooerl\instance\dat
 #caminho_contratos = r'C:\Users\victor.crespo\Downloads\cooerl\instance\data\CONTRATOS (2).CSV'
 #df_fornecedores = pd.read_csv(caminho_excel, sep = ';', encoding = 'latin1')
 #df_contrato = pd.read_csv(caminho_contratos, sep = ';', encoding = 'latin1')
-df_compras_diretas = pd.read_csv(caminho_compras_diretas, sep = ';', encoding = 'latin1')
+df_outras = pd.read_csv(caminho_compras_diretas, sep = ';', encoding = 'latin1')
 
 def transformar_sqlite_fornecedores(df): #Função para transformar o Dataframe em SQL e inseri-los na tabela SQL 'fornecedores'
   with app.app_context():
@@ -64,4 +64,13 @@ def transformar_sqlite_compras_diretas(df):
 
 
 
-transformar_sqlite_compras_diretas(df_compras_diretas)
+def transformar_sqlite_outras_compras(df):
+  with app.app_context():
+    df = funcao_compras.tratar_outras_compras(df)
+
+    conn = db.get_db()
+
+    df.to_sql('outras_compras', conn, if_exists = 'append', index = False)
+    print(f'Dados inseridos na tabela compras_diretas com sucesso!')
+
+transformar_sqlite_compras_diretas(df_outras)

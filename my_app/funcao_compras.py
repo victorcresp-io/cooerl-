@@ -58,3 +58,37 @@ def tratar_compras(df): # Função para tratamento da tabela FORNECEDORES.
     df = alterar_colunas_compras(df)
     df = tratar_cnpj_df(df)
     return df
+
+
+def alterar_colunas_outras_compras(df):
+    dados = {
+         'Unidade': 'unidade',
+         'ID Processo': 'id_processo',
+         'Processo': 'processo',
+         'Objeto': 'objeto',
+         'Afastamento': 'afastamento',
+         'Enquadramento Legal': 'enquadramento_legal',
+         'Data de Aprovação': 'data_aprovacao',
+         'Valor do Processo (R$)': 'valor_processo',
+         'CNPJ_CPF': 'cpf_cnpj',
+         'Fornecedor Vencedor': 'fornecedor_vencedor',
+         'ID Item': 'id_item',
+         'Item': 'item',
+         'Qtd.': 'quantidade',
+         'Unidade de Medida': 'unidade_medida',
+         'Vl. Unitário (R$)': 'valor_unitario',
+         'Regime': 'regime'
+    }    
+
+    df.rename(columns=dados, inplace=True)
+    print('df_alterado')
+    print(df.info())
+    return df
+
+def tratar_outras_compras(df): # Função para tratamento da tabela FORNECEDORES.
+    df.drop('data_extracao', axis = 1, inplace = True)
+    df.drop('Unnamed: 17', axis = 1, inplace = True)
+    df = tratar_nome_fornecedores(df)
+    df = alterar_colunas_outras_compras(df)
+    df = tratar_cnpj_df(df)
+    return df
