@@ -1,4 +1,7 @@
-DROP TABLE compras_diretas;
+DROP TABLE IF EXISTS fornecedores;
+DROP TABLE IF EXISTS contratos;
+DROP TABLE IF EXISTS compras_diretas;
+DROP TABLE IF EXISTS outras_compras;
 
 CREATE TABLE IF NOT EXISTS fornecedores (
     fornecedor TEXT NOT NULL,
@@ -9,7 +12,8 @@ CREATE TABLE IF NOT EXISTS fornecedores (
     situacao VARCHAR(40),
     data_cadastro DATETIME,
     cidade VARCHAR(40),
-    UF CHAR(2)
+    uf CHAR(2),
+    data_adicao TEXT DEFAULT CURRENT_TIMESTAMP 
 );
 
 
@@ -35,7 +39,8 @@ CREATE TABLE IF NOT EXISTS contratos (
     valor_total_pago FLOAT,
     data_publicacao_deorj DATETIME,
     regime_juridico TEXT,
-    url_pncp TEXT
+    url_pncp TEXT,
+    data_adicao TEXT DEFAULT CURRENT_TIMESTAMP 
 );
 
 CREATE TABLE IF NOT EXISTS compras_diretas ( 
@@ -55,7 +60,8 @@ CREATE TABLE IF NOT EXISTS compras_diretas (
     valor_unitario FLOAT,
     ped VARCHAR(3),
     regime TEXT,
-    unidade_medida TEXT
+    unidade_medida TEXT,
+    data_adicao TEXT DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS outras_compras ( 
@@ -74,5 +80,6 @@ CREATE TABLE IF NOT EXISTS outras_compras (
     quantidade INT,
     valor_unitario FLOAT,
     regime TEXT,
-    unidade_medida TEXT
+    unidade_medida TEXT,
+    data_adicao TEXT DEFAULT CURRENT_TIMESTAMP
 );
