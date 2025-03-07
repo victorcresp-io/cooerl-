@@ -4,6 +4,8 @@ from my_app.funcao_fornecedores import tratar_cnpj
 import pandas as pd
 from io import BytesIO
 
+import time
+
 bp = Blueprint('siga', __name__)
 
 @bp.route('/')
@@ -19,66 +21,105 @@ def rota1():
     cnpj_filtro = None
 
 
+
     """ Rota para processar a requisição e redirecionar para o download """
     if request.method == 'POST':
         empresa_filtro = request.form.get('empresa')
         cnpj_filtro = request.form.get('cnpj')
         cnpj_filtro = tratar_cnpj(cnpj_filtro)
         print(f'Empresa recebida: {empresa_filtro}')
+        print(f'CNPJ recebido {cnpj_filtro}')
 
         #Verificando se a empresa está na base FORNECEDORES.
         db = get_db()
         cursor = db.cursor()
+        print('aqui deu certo')
         try: 
-
             cursor.execute('SELECT fornecedor, cpf_cnpj FROM fornecedores WHERE fornecedor = ? OR cpf_cnpj = ?', (empresa_filtro, cnpj_filtro))
             resultado = cursor.fetchone()
+            
 
             if not resultado:
                 flash('Empresa não encontrada', 'error')
                 return redirect(url_for('siga.rota1'))
             
-            empresa_db, cnpj_db = resultado
+            empresa_db, cnpj_db = resultado  #Empresa no banco de dados.
+            print('Empresa recebida', empresa_db)
+            print('CNPJ RECEBIDO', cnpj_db)
+ 
+            if empresa_filtro == empresa_db or cnpj_filtro == cnpj_db:
+                cursor.execute('SELECT fornecedor, situacao FROM fornecedores WHERE fornecedor = ? OR cpf_cnpj = ?', (empresa_db, cnpj_db))
+                resultado = cursor.fetchone()
+                empresa_html, situacao = resultado
+                print(empresa_html)
+                print(situacao)
+                cursor.execute('SELECT COUNT(cpf_cnpj)  FROM compras_diretas WHERE fornecedor_vencedor = ? OR cpf_cnpj = ?', (empresa_db, cnpj_db))
+                teste  = cursor.fetchone()
+                total_compras_diretas = teste[0] 
+                print('TD OK')
+                cursor.execute('SELECT COUNT(cpf_cnpj) FROM outras_compras WHERE fornecedor_vencedor = ? OR cpf_cnpj = ?', (empresa_db, cnpj_db))
+                resultado = cursor.fetchone()
+                total_outras_compras = resultado[0]
+                print('aqui passou tbm')
+                cursor.execute('SELECT COUNT(cpf_cnpj) FROM contratos WHERE fornecedor = ? OR cpf_cnpj = ?', (empresa_db, cnpj_db))
+                resultado = cursor.fetchone()
+                total_contratos = resultado[0]
+                print('aqui tbm ok')
+                resumo = {
+                        'empresa': empresa_html,
+                        'situacao': situacao,
+                        'total_contratos': total_contratos,
+                        'total_compras_diretas': total_compras_diretas,
+                        'total_outras_compras': total_outras_compras
+                    }
+                print('oi')
+                
+                return render_template('fornecedores.html', resumo = resumo, empresa_filtro = empresa_db, cnpj_filtro = cnpj_db)
+            else:
+                flash('Empresa fornecida não corresponde ao CNPJ informado', 'error')
+                return redirect(url_for('siga.rota1'))
+        except Exception as e:
+            print('Aconteceu o seguinte erro:', e)
 
 
-            if empresa_filtro and empresa_filtro != empresa_db:
+            '''if empresa_filtro == empresa_db or cnpj_filtro == cnpj_db:
+                cursor.execute('SELECT fornecedor, situacao FROM fornecedores WHERE fornecedor = ? OR cpf_cnpj = ?', (empresa_filtro, cnpj_filtro))
+                resultado = cursor.fetchone()
+                empresa_html, situacao = resultado
+                cursor.execute('SELECT COUNT(cpf_cnpj) FROM compras_diretas WHERE fornecedor_vencedor = ? OR cpf_cnpj = ?', (empresa_filtro, cnpj_filtro))
+                total_compras_diretas = cursor.fetchone()[0]
+                cursor.execute('SELECT COUNT(cpf_cnpj), situacao FROM outras_compras WHERE fornecedor_vencedor = ? OR cpf_cnpj = ?', (empresa_filtro, cnpj_filtro))
+                total_outras_compras = cursor.fetchone()[0]
+                cursor.execute('SELECT COUNT(cpf_cnpj), situacao FROM contratos WHERE fornecedor = ? OR cpf_cnpj = ?', (empresa_filtro, cnpj_filtro))
+                total_contratos = cursor.fetchone()[0]
+                resumo = {
+                    'empresa': empresa_html,
+                    'situacao': situacao,
+                    'total_contratos': total_contratos,
+                    'total_compras_diretas': total_compras_diretas,
+                    'total_outras_compras': total_outras_compras
+                }
+            else:
                 flash('Empresa fornecida não corresponde ao CNPJ informado', 'error')
                 return redirect(url_for('siga.rota1'))
             
-            if cnpj_filtro and cnpj_filtro != cnpj_db: 
+            elif cnpj_filtro != cnpj_db: 
                 flash('CNPJ fornecido não corresponde a empresa informada', 'error')
                 return redirect(url_for('siga.rota1'))
             
-            if empresa_filtro and not cnpj_filtro:
+            start_time = time.time()
+
+
+            if empresa_filtro or cnpj_filtro:
                 cursor.execute('SELECT fornecedor, situacao FROM fornecedores WHERE fornecedor = ? OR cpf_cnpj = ?', (empresa_filtro, cnpj_filtro))
                 resultado = cursor.fetchone()
                 empresa_html, situacao = resultado
-                cursor.execute('SELECT COUNT(*) FROM compras_diretas WHERE fornecedor_vencedor = ?', (empresa_filtro,))
+                cursor.execute('SELECT COUNT(cpf_cnpj) FROM compras_diretas WHERE fornecedor_vencedor = ? OR cpf_cnpj = ?', (empresa_filtro, cnpj_filtro))
                 total_compras_diretas = cursor.fetchone()[0]
-                cursor.execute('SELECT COUNT(*) FROM outras_compras WHERE fornecedor_vencedor = ?', (empresa_filtro,))
+                cursor.execute('SELECT COUNT(cpf_cnpj), situacao FROM outras_compras WHERE fornecedor_vencedor = ? OR cpf_cnpj = ?', (empresa_filtro, cnpj_filtro))
                 total_outras_compras = cursor.fetchone()[0]
-                cursor.execute('SELECT COUNT(*) FROM contratos WHERE fornecedor = ?', (empresa_filtro,))
+                cursor.execute('SELECT COUNT(cpf_cnpj), situacao FROM contratos WHERE fornecedor = ? OR cpf_cnpj = ?', (empresa_filtro, cnpj_filtro))
                 total_contratos = cursor.fetchone()[0]
-                resumo = {
-                    'empresa': empresa_html,
-                    'situacao': situacao,
-                    'total_contratos': total_contratos,
-                    'total_compras_diretas': total_compras_diretas,
-                    'total_outras_compras': total_outras_compras
-                }
-
-
-            else:
-                cursor.execute('SELECT fornecedor, situacao FROM fornecedores WHERE fornecedor = ? OR cpf_cnpj = ?', (empresa_filtro, cnpj_filtro))
-                resultado = cursor.fetchone()
-                empresa_html, situacao = resultado
-                cursor.execute('SELECT COUNT(*) FROM compras_diretas WHERE cpf_cnpj = ?', (cnpj_filtro,))
-                total_compras_diretas = cursor.fetchone()[0]
-                cursor.execute('SELECT COUNT(*) FROM outras_compras WHERE cpf_cnpj = ?', (cnpj_filtro,))
-                total_outras_compras = cursor.fetchone()[0]
-                cursor.execute('SELECT COUNT(*) FROM contratos WHERE cpf_cnpj = ?', (cnpj_filtro,))
-                total_contratos = cursor.fetchone()[0]
-
                 resumo = {
                     'empresa': empresa_html,
                     'situacao': situacao,
@@ -87,10 +128,13 @@ def rota1():
                     'total_outras_compras': total_outras_compras
                 }
             
+            end_time = time.time()
+            execution_time = end_time - start_time
+            print(f'Tempo de execução: {execution_time} segundos')
 
         except Exception as e:
             flash(f'Ocorreu um erro: {str(e)}', 'error')
-            return redirect(url_for('siga.rota1'))
+            return redirect(url_for('siga.rota1'))'''
 
 
     return render_template('fornecedores.html', resumo = resumo, empresa_filtro = empresa_filtro, cnpj_filtro = cnpj_filtro)
@@ -114,7 +158,7 @@ def excel_download():
 
     query_compras_diretas = 'SELECT * FROM compras_diretas WHERE fornecedor_vencedor = ? OR cpf_cnpj = ?'
 
-    query_outras_compras = 'SELECT * FROM compras_diretas WHERE fornecedor_vencedor = ? OR cpf_cnpj = ?'
+    query_outras_compras = 'SELECT * FROM outras_compras WHERE fornecedor_vencedor = ? OR cpf_cnpj = ?'
 
 
 

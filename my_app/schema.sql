@@ -13,7 +13,7 @@ CREATE TABLE IF NOT EXISTS fornecedores (
     data_cadastro DATETIME,
     cidade VARCHAR(40),
     uf CHAR(2),
-    data_adicao TEXT DEFAULT CURRENT_TIMESTAMP 
+    data_adicao DATE DEFAULT (CURRENT_DATE)
 );
 
 
@@ -40,7 +40,7 @@ CREATE TABLE IF NOT EXISTS contratos (
     data_publicacao_deorj DATETIME,
     regime_juridico TEXT,
     url_pncp TEXT,
-    data_adicao TEXT DEFAULT CURRENT_TIMESTAMP 
+    data_adicao DATE DEFAULT (CURRENT_DATE)
 );
 
 CREATE TABLE IF NOT EXISTS compras_diretas ( 
@@ -61,7 +61,7 @@ CREATE TABLE IF NOT EXISTS compras_diretas (
     ped VARCHAR(3),
     regime TEXT,
     unidade_medida TEXT,
-    data_adicao TEXT DEFAULT CURRENT_TIMESTAMP
+    data_adicao DATE DEFAULT (CURRENT_DATE)
 );
 
 CREATE TABLE IF NOT EXISTS outras_compras ( 
@@ -81,5 +81,5 @@ CREATE TABLE IF NOT EXISTS outras_compras (
     valor_unitario FLOAT,
     regime TEXT,
     unidade_medida TEXT,
-    data_adicao TEXT DEFAULT CURRENT_TIMESTAMP
+    data_adicao DATE DEFAULT (CURRENT_DATE)
 );
