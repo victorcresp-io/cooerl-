@@ -1,6 +1,6 @@
 from flask import Blueprint, request, send_file, render_template, flash, redirect, url_for
 from my_app.db import get_db
-from my_app.funcao_fornecedores import tratar_cnpj
+from my_app.funcao_fornecedores import tratar_cnpj, tratar_empresa
 import pandas as pd
 from io import BytesIO
 
@@ -25,6 +25,7 @@ def rota1():
     """ Rota para processar a requisição e redirecionar para o download """
     if request.method == 'POST':
         empresa_filtro = request.form.get('empresa')
+        empresa_filtro = tratar_empresa(empresa_filtro)
         cnpj_filtro = request.form.get('cnpj')
         cnpj_filtro = tratar_cnpj(cnpj_filtro)
         print(f'Empresa recebida: {empresa_filtro}')

@@ -23,6 +23,17 @@ def tratar_cnpj(cnpj):
     cnpj = cnpj.strip()  # Remove espaços antes e depois do CNPJ.
     return cnpj
 
+def tratar_empresa(empresa):
+      empresa = empresa.replace('-', '')
+      empresa = empresa.replace('  ', ' ')
+      empresa = empresa.replace('/', '')
+      empresa = empresa.replace('.', '')
+      empresa = empresa.replace(r'\s+', '')
+      empresa = empresa.replace(',', '')
+      empresa = empresa.strip()
+      empresa = empresa.upper()
+      return empresa
+
 def tratar_nome_fornecedores(df):
     df['Nome/Razão Social'] = df['Nome/Razão Social'].str.replace(r'\s+', ' ', regex=True)
     df['Nome/Razão Social'] = df['Nome/Razão Social'].str.replace(',','')
