@@ -27,20 +27,24 @@
 
             <form action="{{ url_for('siga.rota1', _external=True) }}" method="POST">
                 <label for="nome">Nome:</label>
-                <input type="text" id="nome" name="empresa" placeholder="Digite o nome da empresa">
-                
-                <label for="cnpj">CNPJ:</label>
+                <span style="position: relative; display: inline-block; width: 100%;">
+                <input type="text" id="nome" name="empresa" placeholder="Digite o nome da empresa" style="width: 100%;">
+                <div id="suggestions" class="suggestions-box"></div>
+                </span>
+                <label id = 'modificando' for="cnpj">CNPJ:</label>
                 <input type="text" id="cnpj" name="cnpj" placeholder="Digite o CNPJ da empresa">
-                
+
                 <button type="submit">Enviar</button>
                 <a href="{{ url_for('hello', _external=True) }}" class="back-button">Voltar ao Menu</a>
             </form>
+
+            <!-- Caixa de Sugestões (adicionada ao HTML) -->
         </div>
 
         <!-- Resumo da Empresa -->
         {% if resumo %}
         <div id="resumo-box" class="resumo-container">
-            <button class="close-btn" onclick="document.getElementById('resumo-box').style.display='none';">✖</button> 
+            <button class="close-btn" onclick="document.getElementById('resumo-box').style.display='none';">✖</button>
             <h3>Resumo da Empresa</h3>
             <div class="resumo-content">
                 <p><strong>Empresa:</strong> {{ resumo.empresa }}</p>
@@ -49,7 +53,7 @@
                 <p><strong>Total de Compras Diretas:</strong> {{ resumo.total_compras_diretas }}</p>
                 <p><strong>Total de Outras Compras:</strong> {{ resumo.total_outras_compras }}</p>
             </div>
-            
+
             <!-- Botão para baixar o Excel -->
             <div class="download-container">
                 <a href="{{ url_for('siga.excel_download', empresa_filtro = empresa_filtro, cnpj_filtro = cnpj_filtro) }}" class="btn-download">
@@ -59,5 +63,55 @@
         </div>
         {% endif %}
     </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const nomeInput = document.getElementById("nome");
+            const suggestionsBox = document.getElementById("suggestions");
+
+            nomeInput.addEventListener("input", function () {
+                const termo = nomeInput.value.trim();
+
+                if (termo.length < 3) {
+                    suggestionsBox.style.display = "none"; 
+                    return;
+                }
+                console.log("Termo de busca:", termo);
+
+                fetch(`get_fornecedores?termo=${termo}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        suggestionsBox.innerHTML = "";
+                        if (data.length === 0) {
+                            suggestionsBox.style.display = "none";
+                            return;
+                        }
+
+                        data.forEach(nome => {
+                            let item = document.createElement("div");
+                            item.textContent = nome;
+                            item.classList.add("suggestion-item");
+
+                            item.addEventListener("click", function () {
+                                nomeInput.value = nome;
+                                suggestionsBox.style.display = "none";
+                            });
+
+                            suggestionsBox.appendChild(item);
+                        });
+
+                        suggestionsBox.style.display = "block";
+                    })
+                    .catch(error => console.error("Erro ao buscar fornecedores:", error));
+            });
+
+            // Esconde a caixa de sugestões se clicar fora
+            document.addEventListener("click", function (event) {
+                if (!suggestionsBox.contains(event.target) && event.target !== nomeInput) {
+                    suggestionsBox.style.display = "none";
+                }
+            });
+        });
+    </script>
 </body>
 </html>

@@ -1,9 +1,13 @@
-from flask import Blueprint, request, send_file, render_template, flash, redirect, url_for
+from flask import Blueprint, request, send_file, render_template, flash, redirect, url_for, jsonify
 from my_app.db import get_db
 from my_app.funcao_fornecedores import tratar_cnpj, tratar_empresa
 import pandas as pd
 from io import BytesIO
 from sqlalchemy import text
+import time
+from datetime import datetime
+
+
 
 
 bp = Blueprint('siga', __name__)
@@ -35,10 +39,11 @@ def rota1():
         db = get_db()
         cursor = db.cursor()
         print('aqui deu certo')
+        data_obj = datetime.now().date()
+        print(data_obj)
         try: 
             cursor.execute('SELECT fornecedor, cpf_cnpj FROM fornecedores WHERE fornecedor = ? OR cpf_cnpj = ?', (empresa_filtro, cnpj_filtro))
             resultado = cursor.fetchone()
-            
 
             if not resultado:
                 flash('Empresa não encontrada', 'error')
@@ -49,26 +54,26 @@ def rota1():
             print('CNPJ RECEBIDO', cnpj_db)
 
 
-            
-            cursor.execute('SELECT MAX(data_adicao) FROM compras_diretas')
-            max_data_adicao = cursor.fetchone()[0]
-            cursor.execute('SELECT fornecedor, situacao FROM fornecedores WHERE cpf_cnpj = ? AND data_adicao = ?', (cnpj_db, max_data_adicao))
+            inicio = time.time()
+
+            cursor.execute('SELECT fornecedor, situacao FROM fornecedores WHERE cpf_cnpj = ? AND data_adicao = ?', (cnpj_db, data_obj))
             resultado = cursor.fetchone()
             empresa_html, situacao = resultado
             print(empresa_html)
             print(situacao)
-            cursor.execute('SELECT COUNT(cpf_cnpj) FROM compras_diretas WHERE cpf_cnpj = ? AND data_adicao = ?', 
-            (cnpj_db, max_data_adicao))
+            cursor.execute('SELECT COUNT(*) FROM compras_diretas WHERE cpf_cnpj = ? AND data_adicao = ?', 
+            (cnpj_db, data_obj))
             teste  = cursor.fetchone()
-            total_compras_diretas = teste[0] 
-            print('TD OK')
-            cursor.execute('SELECT COUNT(cpf_cnpj) FROM outras_compras WHERE cpf_cnpj = ? AND data_adicao = ?', (cnpj_db, max_data_adicao))
+            total_compras_diretas = teste[0]
+            print('Compras_diretas passou')
+            cursor.execute('SELECT COUNT(*) FROM outras_compras WHERE cpf_cnpj = ? AND data_adicao = ?', (cnpj_db, data_obj))
             resultado = cursor.fetchone()
             total_outras_compras = resultado[0]
-            print('aqui passou tbm')
-            cursor.execute('SELECT COUNT(cpf_cnpj) FROM contratos WHERE cpf_cnpj = ? AND  data_adicao = ?', (cnpj_db, max_data_adicao))
+            print('Outras_compras passou')
+            cursor.execute('SELECT COUNT(*) FROM contratos WHERE cpf_cnpj = ? AND  data_adicao = ?', (cnpj_db, data_obj))
             resultado = cursor.fetchone()
             total_contratos = resultado[0]
+            
             print('aqui tbm ok')
             resumo = {
                     'empresa': empresa_html,
@@ -78,6 +83,10 @@ def rota1():
                     'total_outras_compras': total_outras_compras
                 }
             print('oi')
+            fim = time.time()
+            tempo_gasto = fim - inicio
+            print(f'Tempo gasto: {tempo_gasto:.6f} segundos')
+
                 
             return render_template('fornecedores.html', resumo = resumo, empresa_filtro = empresa_db, cnpj_filtro = cnpj_db)
         except Exception as e:
@@ -90,34 +99,58 @@ def rota1():
     return render_template('fornecedores.html', resumo = resumo, empresa_filtro = empresa_filtro, cnpj_filtro = cnpj_filtro)
 
 
+@bp.route('/get_fornecedores', methods=['GET'])
+def get_fornecedores():
+    termo = request.args.get('termo', '').strip().upper()
+
+    if not termo:
+        return jsonify([])  # Se o usuário não digitou nada, retorna lista vazia
+
+    try:
+        # Conectar ao banco de dados SQLite
+        conn = get_db()
+        cursor = conn.cursor()
+
+        # Consulta para buscar fornecedores que contêm o termo digitado
+        cursor.execute("SELECT DISTINCT(fornecedor) FROM fornecedores WHERE fornecedor LIKE ? LIMIT 5", (f"%{termo}%",))
+        fornecedores = [row[0] for row in cursor.fetchall()]  # Converte os resultados para uma lista
+
+        conn.close()  # Fecha a conexão
+        return jsonify(fornecedores)
+
+    except Exception as e:
+        print(f"Erro ao buscar fornecedores: {e}")
+        return jsonify({"error": "Erro interno no servidor"}), 500
+
 @bp.route('/excel_download')
 def excel_download():
     """ Rota para gerar o arquivo Excel diretamente do banco """
-    empresa = request.args.get('empresa_filtro')
+    #empresa = request.args.get('empresa_filtro')
     cnpj = request.args.get('cnpj_filtro')
-    print(empresa)
+    data = datetime.now().date()
+    #print(empresa)
     print(cnpj)
 
     db = get_db()
     cursor = db.cursor()
 
 
-    query_fornecedores = 'SELECT * FROM fornecedores WHERE fornecedor = ? OR cpf_cnpj = ?'
+    query_fornecedores = 'SELECT * FROM fornecedores WHERE data_adicao = ? AND cpf_cnpj = ?'
 
-    query_contratos = 'SELECT * FROM contratos WHERE fornecedor = ? OR cpf_cnpj = ?'
+    query_contratos = 'SELECT * FROM contratos WHERE data_adicao = ? AND cpf_cnpj = ?'
 
-    query_compras_diretas = 'SELECT * FROM compras_diretas WHERE fornecedor_vencedor = ? OR cpf_cnpj = ?'
+    query_compras_diretas = 'SELECT * FROM compras_diretas WHERE data_adicao = ? AND cpf_cnpj = ?'
 
-    query_outras_compras = 'SELECT * FROM outras_compras WHERE fornecedor_vencedor = ? OR cpf_cnpj = ?'
+    query_outras_compras = 'SELECT * FROM outras_compras WHERE data_adicao = ? AND cpf_cnpj = ?'
 
 
 
 
     # Consultar dados diretamente do banco
-    df_fornecedores = pd.read_sql_query(query_fornecedores, db, params = (empresa, cnpj))
-    df_contratos = pd.read_sql_query(query_contratos, db, params = (empresa, cnpj))
-    df_compras_diretas = pd.read_sql_query(query_compras_diretas, db, params = (empresa, cnpj))
-    df_outras_compras = pd.read_sql_query(query_outras_compras, db, params = (empresa, cnpj))
+    df_fornecedores = pd.read_sql_query(query_fornecedores, db, params = (data, cnpj))
+    df_contratos = pd.read_sql_query(query_contratos, db, params = (data, cnpj))
+    df_compras_diretas = pd.read_sql_query(query_compras_diretas, db, params = (data, cnpj))
+    df_outras_compras = pd.read_sql_query(query_outras_compras, db, params = (data, cnpj))
 
 
     if df_fornecedores.empty:

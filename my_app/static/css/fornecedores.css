@@ -66,6 +66,11 @@ button[type="submit"]:hover {
     background-color: #004080;
 }
 
+#nome {
+    margin-top: 1px;
+}
+
+
 .back-button {
     width: 100%;
     display: block;
@@ -163,4 +168,55 @@ button.close-btn:hover {
 
 .btn-download:hover {
     background-color: #218838;
+}
+
+#nome {
+    margin-bottom: 0;
+}
+
+#modificando {
+    margin-top: 11px;
+}
+
+/* Caixa de sugestões */
+/* Caixa de sugestões */
+/* Caixa de sugestões aprimorada */
+.suggestions-box {
+    position: absolute;
+    background: white;
+    border: 1px solid #ccc;
+    width: calc(100% - 24px); /* Ajusta a largura para não ultrapassar o campo */
+    max-width: 400px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    display: none;
+    top: 100%;
+    margin-top: 0;;
+    z-index: 10000;
+    overflow: hidden;
+}
+
+/* Estilo dos itens de sugestão */
+.suggestion-item {
+    padding: 12px;
+    cursor: pointer;
+    font-size: 16px;
+    border-bottom: 1px solid #eee;
+    transition: background 0.3s ease;
+}
+
+/* Remove a borda do último item */
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+
+/* Hover aprimorado */
+.suggestion-item:hover {
+    background-color: #f8f9fa;
+}
+
+/* Melhor integração com o input */
+input[type="text"] {
+    position: relative;
+    z-index: 1100; /* Garante que o input fique acima de outros elementos */
 }
