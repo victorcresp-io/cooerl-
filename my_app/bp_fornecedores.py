@@ -41,7 +41,7 @@ def rota1():
         data_obj = datetime.now().date()
         print(data_obj)
         try: 
-            cursor.execute('SELECT fornecedor, cpf_cnpj FROM fornecedores WHERE fornecedor = ? OR cpf_cnpj = ?', (empresa_filtro, cnpj_filtro))
+            cursor.execute('SELECT fornecedor, cpf_cnpj FROM fornecedores WHERE (fornecedor = ? OR cpf_cnpj = ?) AND data_adicao = ?' , (empresa_filtro, cnpj_filtro, data_obj))
             resultado = cursor.fetchone()
 
             if not resultado:
@@ -51,6 +51,7 @@ def rota1():
             empresa_db, cnpj_db = resultado  #Empresa no banco de dados.
             print('Empresa recebida', empresa_db)
             print('CNPJ RECEBIDO', cnpj_db)
+            
 
 
             inicio = time.time()

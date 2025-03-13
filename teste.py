@@ -6,13 +6,14 @@ from datetime import datetime
 app = create_app()
 
 with app.app_context():
-
+    data = datetime.now().date()
     conn = get_db()
     cursor = conn.cursor()
-    data = '2025-3-7'
-    data = datetime.strptime(data, '%Y-%m-%d').date()
-    cursor.execute("SELECT DISTINCT(data_adicao) FROM contratos")
-    for linha in cursor.fetchall():
-        print(dict(linha))
+    cpf_cnpj = None
+    empresa = 'BDM SERVICOS EM ORGANIZACAO ADMINISTRATIVA E INFORMATICA LTDA - ME'
+    data = datetime.now().date()
+    cursor.execute('VACUUM')
+    conn.commit()
 
+    print('td ok')
 
