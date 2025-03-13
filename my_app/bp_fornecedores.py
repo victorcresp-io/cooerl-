@@ -3,7 +3,6 @@ from my_app.db import get_db
 from my_app.funcao_fornecedores import tratar_cnpj, tratar_empresa
 import pandas as pd
 from io import BytesIO
-from sqlalchemy import text
 import time
 from datetime import datetime
 
