@@ -18,10 +18,10 @@ def rota():
 @bp.route('/rota1', methods=['GET', 'POST'])
 def rota1():
     resumo = None
-    empresa_html = None
+    empresa_db = None
     situacao = None
     empresa_filtro = None
-    cnpj_filtro = None
+    cnpj_db = None
 
 
 
@@ -31,52 +31,54 @@ def rota1():
         empresa_filtro = tratar_empresa(empresa_filtro)
         cnpj_filtro = request.form.get('cnpj')
         cnpj_filtro = tratar_cnpj(cnpj_filtro)
-        print(f'Empresa recebida: {empresa_filtro}')
-        print(f'CNPJ recebido {cnpj_filtro}')
+        print(f'Empresa recebida no formulário: {empresa_filtro}')
+        print(f'CNPJ recebido no formulário: {cnpj_filtro}')
 
         #Verificando se a empresa está na base FORNECEDORES.
         db = get_db()
         cursor = db.cursor()
-        print('aqui deu certo')
+        print('Conexão com banco de dados feita com sucesso!')
         data_obj = datetime.now().date()
-        print(data_obj)
+        print('Data usada como parâmetro: ', data_obj)
         try: 
-            cursor.execute('SELECT fornecedor, cpf_cnpj FROM fornecedores WHERE (fornecedor = ? OR cpf_cnpj = ?) AND data_adicao = ?' , (empresa_filtro, cnpj_filtro, data_obj))
-            resultado = cursor.fetchone()
-
-            if not resultado:
-                flash('Empresa não encontrada', 'error')
+            if cnpj_filtro:
+                cursor.execute('SELECT fornecedor, cpf_cnpj, situacao FROM fornecedores WHERE cpf_cnpj = ? AND data_adicao = ?' , (cnpj_filtro, data_obj))
+                resultado = cursor.fetchone()
+                empresa_db, cnpj_db, situacao = resultado
+            else:
+                cursor.execute('SELECT fornecedor, cpf_cnpj, situacao FROM fornecedores WHERE fornecedor = ? AND data_adicao = ?' , (empresa_filtro, data_obj))
+                resultado = cursor.fetchone()
+                empresa_db, cnpj_db, situacao = resultado
+            print('Filtragem por CNPJ ou EMPRESA - OK')
+            print('Empresa no banco de dados:', empresa_db)
+            print('CNPJ no banco de dados:', cnpj_db)
+            print('Situação da empresa:', situacao)
+        except TypeError as e:
+                flash('Empresa não encontrada, verifique o nome!', 'error')
                 return redirect(url_for('siga.rota1'))
-            
-            empresa_db, cnpj_db = resultado  #Empresa no banco de dados.
-            print('Empresa recebida', empresa_db)
-            print('CNPJ RECEBIDO', cnpj_db)
-            
 
+    
+            
+        try:
 
             inicio = time.time()
-
-            cursor.execute('SELECT fornecedor, situacao FROM fornecedores WHERE cpf_cnpj = ? AND data_adicao = ?', (cnpj_db, data_obj))
-            resultado = cursor.fetchone()
-            empresa_html, situacao = resultado
-            print(empresa_html)
-            print(situacao)
-            cursor.execute('SELECT COUNT(*) FROM compras_diretas WHERE cpf_cnpj = ? AND data_adicao = ?', 
-            (cnpj_db, data_obj))
+            print('Começando a busca no banco de dados')
+            cursor.execute('SELECT COUNT(*) FROM compras_diretas WHERE (cpf_cnpj = ? OR fornecedor_vencedor = ?)  AND data_adicao = ?', 
+            (cnpj_db, empresa_db, data_obj))
             teste  = cursor.fetchone()
             total_compras_diretas = teste[0]
             print('Compras_diretas passou')
-            cursor.execute('SELECT COUNT(*) FROM outras_compras WHERE cpf_cnpj = ? AND data_adicao = ?', (cnpj_db, data_obj))
+            cursor.execute('SELECT COUNT(*) FROM outras_compras WHERE (cpf_cnpj = ? OR fornecedor_vencedor = ?) AND data_adicao = ?', (cnpj_db,empresa_db, data_obj))
             resultado = cursor.fetchone()
             total_outras_compras = resultado[0]
             print('Outras_compras passou')
-            cursor.execute('SELECT COUNT(*) FROM contratos WHERE cpf_cnpj = ? AND  data_adicao = ?', (cnpj_db, data_obj))
+            cursor.execute('SELECT COUNT(*) FROM contratos WHERE (cpf_cnpj = ? OR fornecedor = ?) AND  data_adicao = ?', (cnpj_db,empresa_db, data_obj))
             resultado = cursor.fetchone()
             total_contratos = resultado[0]
             
             print('aqui tbm ok')
             resumo = {
-                    'empresa': empresa_html,
+                    'empresa': empresa_db,
                     'situacao': situacao,
                     'total_contratos': total_contratos,
                     'total_compras_diretas': total_compras_diretas,
@@ -96,7 +98,7 @@ def rota1():
     
 
 
-    return render_template('fornecedores.html', resumo = resumo, empresa_filtro = empresa_filtro, cnpj_filtro = cnpj_filtro)
+    return render_template('fornecedores.html', resumo = resumo, empresa_filtro = empresa_db, cnpj_filtro = cnpj_db)
 
 
 @bp.route('/get_fornecedores', methods=['GET'])
@@ -125,7 +127,8 @@ def get_fornecedores():
 @bp.route('/excel_download')
 def excel_download():
     """ Rota para gerar o arquivo Excel diretamente do banco """
-    #empresa = request.args.get('empresa_filtro')
+    empresa = request.args.get('empresa_filtro')
+    print(empresa)
     cnpj = request.args.get('cnpj_filtro')
     data = datetime.now().date()
     #print(empresa)
@@ -135,26 +138,29 @@ def excel_download():
     cursor = db.cursor()
 
 
-    query_fornecedores = 'SELECT * FROM fornecedores WHERE data_adicao = ? AND cpf_cnpj = ?'
+    query_fornecedores = 'SELECT * FROM fornecedores WHERE data_adicao = ? AND (cpf_cnpj = ? OR fornecedor = ?)' 
 
-    query_contratos = 'SELECT * FROM contratos WHERE data_adicao = ? AND cpf_cnpj = ?'
+    query_contratos = 'SELECT * FROM contratos WHERE data_adicao = ? AND (cpf_cnpj = ? OR fornecedor = ?)'
 
-    query_compras_diretas = 'SELECT * FROM compras_diretas WHERE data_adicao = ? AND cpf_cnpj = ?'
+    query_compras_diretas = 'SELECT * FROM compras_diretas WHERE data_adicao = ? AND (cpf_cnpj = ? OR fornecedor_vencedor = ?)'
 
-    query_outras_compras = 'SELECT * FROM outras_compras WHERE data_adicao = ? AND cpf_cnpj = ?'
+    query_outras_compras = 'SELECT * FROM outras_compras WHERE data_adicao = ? AND (cpf_cnpj = ? OR fornecedor_vencedor = ?)'
 
 
 
 
     # Consultar dados diretamente do banco
-    df_fornecedores = pd.read_sql_query(query_fornecedores, db, params = (data, cnpj))
-    df_contratos = pd.read_sql_query(query_contratos, db, params = (data, cnpj))
-    df_compras_diretas = pd.read_sql_query(query_compras_diretas, db, params = (data, cnpj))
-    df_outras_compras = pd.read_sql_query(query_outras_compras, db, params = (data, cnpj))
+    df_fornecedores = pd.read_sql_query(query_fornecedores, db, params = (data, cnpj, empresa))
+    df_contratos = pd.read_sql_query(query_contratos, db, params = (data, cnpj, empresa))
+    df_compras_diretas = pd.read_sql_query(query_compras_diretas, db, params = (data, cnpj, empresa))
+    df_outras_compras = pd.read_sql_query(query_outras_compras, db, params = (data, cnpj, empresa))
 
+    nome = empresa.split()
+    primeiro_nome = nome[0]
+    segundo_nome = nome[1]
 
-    if df_fornecedores.empty:
-        flash('Verifique o nome da empresa')
+    nome_todo = primeiro_nome + '_' + segundo_nome + '.xlsx'
+    nome_todo = nome_todo.lower()
     # Criar o arquivo Excel na memória
     buffer = BytesIO()
     with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
@@ -167,6 +173,6 @@ def excel_download():
     return send_file(
         buffer,
         as_attachment=True,
-        download_name='dados.xlsx',
-        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+        download_name=nome_todo,
+        mimetype='application/vnds.openxmlformats-officedocument.spreadsheetml.sheet'
     )

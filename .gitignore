@@ -4,3 +4,4 @@ __pycache__
 .pytest_cache
 freeze
 teste_sql.py
+FORNECEDOR_SANCOES.CSV

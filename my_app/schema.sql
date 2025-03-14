@@ -1,7 +1,3 @@
-DROP TABLE IF EXISTS fornecedores;
-DROP TABLE IF EXISTS contratos;
-DROP TABLE IF EXISTS compras_diretas;
-DROP TABLE IF EXISTS outras_compras;
 
 CREATE TABLE IF NOT EXISTS fornecedores (
     fornecedor TEXT NOT NULL,
@@ -83,3 +79,16 @@ CREATE TABLE IF NOT EXISTS outras_compras (
     unidade_medida TEXT,
     data_adicao DATE DEFAULT (CURRENT_DATE)
 );
+
+
+CREATE TABLE IF NOT EXISTS fornecedores_cpnjnull (
+    fornecedor TEXT NOT NULL,
+    crc CHAR(3),
+    tipo_empresarial TEXT,
+    me_epp CHAR(3),
+    situacao VARCHAR(40),
+    data_cadastro DATETIME,
+    cidade VARCHAR(40),
+    uf CHAR(2),
+    data_adicao DATE DEFAULT (CURRENT_DATE)
+)
