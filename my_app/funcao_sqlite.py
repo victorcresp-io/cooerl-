@@ -74,3 +74,5 @@ def transformar_sqlite_outras_compras(df):
     print(f'Dados inseridos na tabela compras_diretas com sucesso!')
 
 transformar_sqlite_compras_diretas(df_outras)
+
+

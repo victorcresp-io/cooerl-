@@ -1,5 +1,6 @@
 from flask import Blueprint, request, send_file, render_template, flash, redirect, url_for, jsonify
 from my_app.db import get_db
+from my_app.funcao_buscadb import buscar_compras, ultima_compra_direta, ultima_compra_outra
 from my_app.funcao_fornecedores import tratar_cnpj, tratar_empresa
 import pandas as pd
 from io import BytesIO
@@ -60,30 +61,30 @@ def rota1():
     
             
         try:
-
             inicio = time.time()
-            print('Começando a busca no banco de dados')
-            cursor.execute('SELECT COUNT(*) FROM compras_diretas WHERE (cpf_cnpj = ? OR fornecedor_vencedor = ?)  AND data_adicao = ?', 
-            (cnpj_db, empresa_db, data_obj))
-            teste  = cursor.fetchone()
-            total_compras_diretas = teste[0]
-            print('Compras_diretas passou')
-            cursor.execute('SELECT COUNT(*) FROM outras_compras WHERE (cpf_cnpj = ? OR fornecedor_vencedor = ?) AND data_adicao = ?', (cnpj_db,empresa_db, data_obj))
-            resultado = cursor.fetchone()
-            total_outras_compras = resultado[0]
-            print('Outras_compras passou')
-            cursor.execute('SELECT COUNT(*) FROM contratos WHERE (cpf_cnpj = ? OR fornecedor = ?) AND  data_adicao = ?', (cnpj_db,empresa_db, data_obj))
-            resultado = cursor.fetchone()
-            total_contratos = resultado[0]
-            
-            print('aqui tbm ok')
+            data = datetime.now().date()
+            resultado = buscar_compras(cnpj_db, empresa_db, data) #Função para buscar compras diretas, outras compras e contratos.
+            resultado2 = 'Nenhuma compra feita'
+            if resultado[0] == 0 and resultado[1] != 0:
+                resultado2 = ultima_compra_outra(db, cnpj_db, empresa_db, data)
+                data_ultima_outra =  resultado2[0]
+                processo_outra =  resultado2[1]
+                resultado2 = f'{data_ultima_outra} - Com o processo {processo_outra} na base Outras Compras'
+            elif resultado[1] == 0 and resultado[0] != 0:
+                resultado2 = ultima_compra_direta(db, cnpj_db, empresa_db, data)
+                data_ultima_direta =  resultado2[0]
+                processo_direta =  resultado2[1]
+                resultado2 = f'{data_ultima_direta} - Com o processo {processo_direta} na base Compras Diretas'
+            else:
+                resultado2 = 'Nenhuma compra feita'
             resumo = {
                     'empresa': empresa_db,
                     'situacao': situacao,
-                    'total_contratos': total_contratos,
-                    'total_compras_diretas': total_compras_diretas,
-                    'total_outras_compras': total_outras_compras
-                }
+                    'total_compras_diretas': resultado[0],
+                    'total_outras_compras': resultado[1],
+                    'total_contratos': resultado[2],
+                    'ultima_compra': resultado2
+                    }
             print('oi')
             fim = time.time()
             tempo_gasto = fim - inicio
