@@ -1,6 +1,6 @@
 from flask import Blueprint, request, send_file, render_template, flash, redirect, url_for, jsonify
 from my_app.db import get_db
-from my_app.funcao_buscadb import buscar_compras, ultima_compra_direta, ultima_compra_outra
+from my_app.funcao_buscadb import buscar_compras, ultima_compra_direta, ultima_compra_outra, buscar_compras_cnpj, ultima_compra_direta_cnpj, ultima_compra_outra_cnpj, comparar_data
 from my_app.funcao_fornecedores import tratar_cnpj, tratar_empresa
 import pandas as pd
 from io import BytesIO
@@ -24,7 +24,7 @@ def rota1():
     empresa_filtro = None
     cnpj_db = None
 
-
+    time_inicio = time.time()
 
     """ Rota para processar a requisição e redirecionar para o download """
     if request.method == 'POST':
@@ -39,56 +39,63 @@ def rota1():
         db = get_db()
         cursor = db.cursor()
         print('Conexão com banco de dados feita com sucesso!')
-        data_obj = datetime.now().date()
-        print('Data usada como parâmetro: ', data_obj)
-        try: 
-            if cnpj_filtro:
-                cursor.execute('SELECT fornecedor, cpf_cnpj, situacao FROM fornecedores WHERE cpf_cnpj = ? AND data_adicao = ?' , (cnpj_filtro, data_obj))
-                resultado = cursor.fetchone()
-                empresa_db, cnpj_db, situacao = resultado
-            else:
-                cursor.execute('SELECT fornecedor, cpf_cnpj, situacao FROM fornecedores WHERE fornecedor = ? AND data_adicao = ?' , (empresa_filtro, data_obj))
-                resultado = cursor.fetchone()
-                empresa_db, cnpj_db, situacao = resultado
-            print('Filtragem por CNPJ ou EMPRESA - OK')
-            print('Empresa no banco de dados:', empresa_db)
-            print('CNPJ no banco de dados:', cnpj_db)
-            print('Situação da empresa:', situacao)
-        except TypeError as e:
-                flash('Empresa não encontrada, verifique o nome!', 'error')
-                return redirect(url_for('siga.rota1'))
-
-    
-            
+        data = datetime.now().date()
+        print('Data usada como parâmetro: ', data)
         try:
-            inicio = time.time()
-            data = datetime.now().date()
-            resultado = buscar_compras(cnpj_db, empresa_db, data) #Função para buscar compras diretas, outras compras e contratos.
-            resultado2 = 'Nenhuma compra feita'
-            if resultado[0] == 0 and resultado[1] != 0:
-                resultado2 = ultima_compra_outra(db, cnpj_db, empresa_db, data)
-                data_ultima_outra =  resultado2[0]
-                processo_outra =  resultado2[1]
-                resultado2 = f'{data_ultima_outra} - Com o processo {processo_outra} na base Outras Compras'
-            elif resultado[1] == 0 and resultado[0] != 0:
-                resultado2 = ultima_compra_direta(db, cnpj_db, empresa_db, data)
-                data_ultima_direta =  resultado2[0]
-                processo_direta =  resultado2[1]
-                resultado2 = f'{data_ultima_direta} - Com o processo {processo_direta} na base Compras Diretas'
+            cursor.execute('SELECT cpf_cnpj, situacao FROM fornecedores WHERE fornecedor = ? AND data_adicao = ?' , (empresa_filtro, data))
+            resultado = cursor.fetchone()
+            cnpj_db, situacao = resultado
+            print(f'Tudo ok por aqui. CNPJ_DB : {cnpj_db} e a situação é {situacao}')
+
+            if cnpj_db:
+
+                resultado = buscar_compras_cnpj(cursor, cnpj_db, data) 
+                data_ultima_compra_direta = ultima_compra_direta_cnpj(cursor, cnpj_db, data)
+                data_ultima_compra_outra = ultima_compra_outra_cnpj(cursor, cnpj_db, data)   
+
+                total_compras_diretas, total_outras_compras, total_contratos = resultado
+
+                data_ultima_direta, processo_ultima_direta = data_ultima_compra_direta
+                data_ultima_outra, processo_ultima_outra = data_ultima_compra_outra
+                
+                data_recente = comparar_data(data_ultima_direta, data_ultima_outra)
+
+
+                resumo = {
+                        'empresa': empresa_db,
+                        'situacao': situacao,
+                        'total_compras_diretas': total_compras_diretas,
+                        'total_outras_compras': total_outras_compras,
+                        'total_contratos': total_contratos,
+                        'ultima_compra': data_recente
+                        }
+                print('Resumo feito')
             else:
-                resultado2 = 'Nenhuma compra feita'
-            resumo = {
-                    'empresa': empresa_db,
-                    'situacao': situacao,
-                    'total_compras_diretas': resultado[0],
-                    'total_outras_compras': resultado[1],
-                    'total_contratos': resultado[2],
-                    'ultima_compra': resultado2
-                    }
-            print('oi')
-            fim = time.time()
-            tempo_gasto = fim - inicio
-            print(f'Tempo gasto: {tempo_gasto:.6f} segundos')
+
+                resultado = buscar_compras(empresa_filtro, data, cursor)
+                data_ultima_compra_direta = ultima_compra_direta(cursor, empresa_filtro, data)
+                data_ultima_compra_outra = ultima_compra_outra(cursor, empresa_filtro, data)
+
+                total_compras_diretas, total_outras_compras, total_contratos = resultado
+                data_ultima_direta, processo_ultima_direta =data_ultima_compra_direta
+                data_ultima_outra, processo_ultima_outra = data_ultima_compra_outra
+
+                data_recente = comparar_data(data_ultima_direta, data_ultima_outra)
+
+
+                resumo = {
+                        'empresa': empresa_db,
+                        'situacao': situacao,
+                        'total_compras_diretas': total_compras_diretas,
+                        'total_outras_compras': total_outras_compras,
+                        'total_contratos': total_contratos,
+                        'ultima_compra': data_recente
+                        }
+                print('Resumo feito')    
+
+        except TypeError:
+            print('Não foi encontrado nenhuma compra direta e indireta')
+
 
                 
             return render_template('fornecedores.html', resumo = resumo, empresa_filtro = empresa_db, cnpj_filtro = cnpj_db)
