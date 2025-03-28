@@ -35,20 +35,19 @@ def buscar_compras(empresa, data, cursor):
     print(f'Tempo gasto na função BUSCAR_COMPRAS: {tempo:.6f} segundos')              
     return total_diretas, total_outras, resultado_contratos
 
-def ultima_compra_direta(cursor, empresa, data):
-    inicio = time.time()
-
+def ultima_compra_direta(cursor, empresa, data, total):
+    
     cursor.execute("SELECT data_aprovacao, id_processo FROM compras_diretas WHERE (data_adicao = ? AND fornecedor_vencedor = ?) ORDER BY data_aprovacao DESC LIMIT 1", (data, empresa))
     res = cursor.fetchone()
     data_ultima_compra_diretas, processo_diretas = res   
     fim = time.time()
-    tempo_gasto = fim - inicio
-    print(f'Tempo gasto total na função ULTIMA_COMPRA_DIRETA: {tempo_gasto:.6f} segundos')
     return data_ultima_compra_diretas, processo_diretas
 
 
 
-def ultima_compra_outra(cursor, empresa, data):
+def ultima_compra_outra(cursor, empresa, data, total):
+    if not total:
+        return 0
     print('Iniciando a busca pela última compra usando empresa como parâmetro')
     cursor.execute("SELECT data_aprovacao, id_processo FROM outras_compras WHERE (data_adicao = ? AND fornecedor_vencedor = ?) ORDER BY data_aprovacao DESC LIMIT 1", (data, empresa))
     res = cursor.fetchone()
@@ -61,6 +60,11 @@ def ultima_compra_outra(cursor, empresa, data):
 def buscar_contratos_cnpj(cursor, cnpj, data):
     cursor.execute("SELECT COUNT(*) AS total_contratos FROM contratos WHERE cpf_cnpj = ? AND data_adicao = ?" ,(cnpj, data))
     resultado = cursor.fetchone()
+    resultado = resultado[0]
+    if resultado == None:
+        resultado = 0
+    print('O total de contratos foi de: ', resultado)
+    
     return resultado
 
 def buscar_compras_cnpj(cursor, cnpj, data):
@@ -74,16 +78,49 @@ def buscar_compras_cnpj(cursor, cnpj, data):
     total_outras = resultado[1]['total_compras']
     print('O total de compras diretas foi de: ', total_diretas)
     print('O total de outras compras foi de: ', total_outras)
-
+    print('Fazendo a busca de contratos agora..')
     resultado_contratos = buscar_contratos_cnpj(cursor, cnpj, data)
-    total_contratos = resultado_contratos[0]
+    print('contratos passou')
+    total_contratos = resultado_contratos
+    print('O total de contratos foi de: ', total_contratos)
 
-    return total_diretas, total_outras, total_contratos    
+    print('Iniciando a busca pela última compra')
+    ultima_compra = 'Nenhuma compra feita'
+    if total_diretas == 0 and total_outras == 0:
+        ultima_compra = 'Nenhuma compra'
+    elif total_diretas == 0 and total_outras != 0:
+        print('AQUI')
+        ultima_compra_outra = ultima_compra_outra_cnpj(cursor, cnpj, data)
+        data_outra, processo_outra = ultima_compra_outra
+        ultima_compra = f'A última compra foi em: {data_outra} com o processo: {processo_outra}'
+    elif total_diretas != 0  and total_outras == 0:
+        print('aq')
+        ultima_compra_direta = ultima_compra_direta_cnpj(cursor, cnpj, data)
+        data_direta, processo_direta = ultima_compra_direta
+        ultima_compra = f'A última compra foi em: {data_direta} com o processo: {processo_direta}'        
+    else:
+        print('oii')
+        ultima_compra_direta = ultima_compra_direta_cnpj(cursor, cnpj, data)
+        ultima_compra_outra = ultima_compra_outra_cnpj(cursor, cnpj, data)
+
+        data_direta, processo_direta = ultima_compra_direta
+        data_outra, processo_outra = ultima_compra_outra
+
+        resultado = comparar_data(data_direta, data_outra)
+        if resultado == data_direta:
+            ultima_compra = f'A última compra foi em: {data_direta} com o processo: {processo_direta}'
+        else:
+            ultima_compra = f'A última compra foi em: {data_outra} com o processo: {processo_outra}'
+    return total_diretas, total_outras, total_contratos, ultima_compra    
 
 def ultima_compra_direta_cnpj(cursor, cnpj, data):
+    inicio = time.time()
     cursor.execute("SELECT data_aprovacao, id_processo FROM compras_diretas WHERE (data_adicao = ? AND cpf_cnpj = ?) ORDER BY data_aprovacao DESC LIMIT 1", (data, cnpj))
     res = cursor.fetchone()
     data_ultima_compra_diretas, processo_diretas = res 
+    fim =  time.time()
+    tempo_total = fim - inicio
+    print(f'Total de tempo gasto: {tempo_total:.6f}')
     return data_ultima_compra_diretas, processo_diretas 
 
 def ultima_compra_outra_cnpj(cursor, cnpj, data):

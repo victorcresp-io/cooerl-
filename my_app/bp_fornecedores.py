@@ -16,8 +16,8 @@ bp = Blueprint('siga', __name__)
 def rota():
     return 'oi'
 
-@bp.route('/rota1', methods=['GET', 'POST'])
-def rota1():
+@bp.route('/fornecedores', methods=['GET', 'POST'])
+def fornecedores():
     resumo = None
     empresa_db = None
     situacao = None
@@ -38,8 +38,10 @@ def rota1():
         #Verificando se a empresa está na base FORNECEDORES.
         db = get_db()
         cursor = db.cursor()
+        tempo1 = time.time()
         print('Conexão com banco de dados feita com sucesso!')
-        data = datetime.now().date()
+        data = '22/03/2025'
+        data = datetime.strptime(data, '%d/%m/%Y').date()
         print('Data usada como parâmetro: ', data)
         try:
             cursor.execute('SELECT cpf_cnpj, situacao FROM fornecedores WHERE fornecedor = ? AND data_adicao = ?' , (empresa_filtro, data))
@@ -49,27 +51,26 @@ def rota1():
 
             if cnpj_db:
 
-                resultado = buscar_compras_cnpj(cursor, cnpj_db, data) 
-                data_ultima_compra_direta = ultima_compra_direta_cnpj(cursor, cnpj_db, data)
-                data_ultima_compra_outra = ultima_compra_outra_cnpj(cursor, cnpj_db, data)   
-
-                total_compras_diretas, total_outras_compras, total_contratos = resultado
-
-                data_ultima_direta, processo_ultima_direta = data_ultima_compra_direta
-                data_ultima_outra, processo_ultima_outra = data_ultima_compra_outra
-                
-                data_recente = comparar_data(data_ultima_direta, data_ultima_outra)
+                resultado = buscar_compras_cnpj(cursor, cnpj_db, data)
+                total_compras_diretas = resultado[0]
+                total_outras_compras = resultado[1]
+                total_contratos = resultado[2]
+                ultima_compra = resultado[3]
 
 
                 resumo = {
-                        'empresa': empresa_db,
+                        'empresa': empresa_filtro,
                         'situacao': situacao,
                         'total_compras_diretas': total_compras_diretas,
                         'total_outras_compras': total_outras_compras,
                         'total_contratos': total_contratos,
-                        'ultima_compra': data_recente
+                        'ultima_compra': ultima_compra
                         }
                 print('Resumo feito')
+                tempo2 = time.time()
+
+                tempo_total = tempo2 - tempo1
+                print(f'Tempo total gasto foi de {tempo_total:.6f}')
             else:
 
                 resultado = buscar_compras(empresa_filtro, data, cursor)
@@ -93,8 +94,8 @@ def rota1():
                         }
                 print('Resumo feito')    
 
-        except TypeError:
-            print('Não foi encontrado nenhuma compra direta e indireta')
+        except Exception as e:
+            flash('Empresa não encontrada, verifique o nome ou cnpj', category= 'error')
 
 
                 
@@ -184,3 +185,12 @@ def excel_download():
         download_name=nome_todo,
         mimetype='application/vnds.openxmlformats-officedocument.spreadsheetml.sheet'
     )
+
+
+@bp.route('/acompanhamento_siga')
+def acompanhamento_siga():
+    return render_template('acompanhamento_siga.html')
+
+@bp.route('/financeiro_siga')
+def financeiro_siga():
+    return 'td ok'

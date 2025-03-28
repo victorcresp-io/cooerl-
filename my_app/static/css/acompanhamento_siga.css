@@ -1,0 +1,34 @@
+body{
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+
+.container-principal{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    width: 100vw;
+    background: pink;
+}
+
+
+.container-secundario {
+    height: 50%;
+    width: 75%;
+    background-color: antiquewhite;
+    text-align: center;
+
+}
+
+.teste{
+    width: 75%;
+    margin-bottom: 5px;
+}
+
+input {
+    width: 100%;
+}
