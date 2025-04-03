@@ -22,5 +22,6 @@ data_antiga = '21/01/2020'
 
 data_antiga = datetime.strptime(data_antiga, '%d/%m/%Y').date()
 print(data_antiga)
-if data > data_antiga:
-    print('ok')
+
+teste = [1,2,3]
+print(len(teste))

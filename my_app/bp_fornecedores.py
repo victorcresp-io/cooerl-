@@ -1,6 +1,6 @@
 from flask import Blueprint, request, send_file, render_template, flash, redirect, url_for, jsonify
-from my_app.db import get_db
-from my_app.funcao_buscadb import buscar_compras, ultima_compra_direta, ultima_compra_outra, buscar_compras_cnpj, ultima_compra_direta_cnpj, ultima_compra_outra_cnpj, comparar_data
+from my_app.db import get_db, get_db2
+from my_app.funcao_buscadb import buscar_compras, ultima_compra_direta, ultima_compra_outra, buscar_compras_cnpj, ultima_compra_direta_cnpj, ultima_compra_outra_cnpj, comparar_data, consulta_contratos, consulta_fornecedores
 from my_app.funcao_fornecedores import tratar_cnpj, tratar_empresa
 import pandas as pd
 from io import BytesIO
@@ -187,10 +187,41 @@ def excel_download():
     )
 
 
-@bp.route('/acompanhamento_siga')
+@bp.route('/acompanhamento_siga', methods = ['GET'])
 def acompanhamento_siga():
-    return render_template('acompanhamento_siga.html')
+    conn = get_db2()
+    data1 = '28/03/2025'
+    data2 = '01/04/2025'
+
+    data1_att = datetime.strptime(data1, '%d/%m/%Y').date()
+    data2_att = datetime.strptime(data2, '%d/%m/%Y').date()
+
+    consultas = {
+        'contratos' : lambda: consulta_contratos(conn, data2_att, data1_att),
+        'fornecedores': lambda: consulta_fornecedores(conn, data2_att, data1_att)
+    }
+
+    filtro = request.args.getlist('filtro')
+    print(consultas['contratos'])
+
+    print(f"Filtro clicado: {filtro}")
+    resultado = {}
+    for item in filtro:
+        if item in consultas:
+            print(consultas[item])
+            consulta_sql = consultas[item]
+            print(consulta_sql)
+            print('Iniciando pelo comando de ', item)
+            try: 
+                resultado[item] = consultas[item]()
+                
+            except Exception as e:
+                print(f'Erro ao executar consulta para {item}: {e}')
+    print(resultado)
+    return render_template('acompanhamento_siga.html', resultado = resultado)
 
 @bp.route('/financeiro_siga')
 def financeiro_siga():
     return 'td ok'
+
+

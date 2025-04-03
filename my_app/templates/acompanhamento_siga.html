@@ -9,19 +9,79 @@
 <body>
 
     <div class="container-principal">
+        <div class="form_container">
 
-        <form action="" class="teste">
-            <label for="teste"></label>
-            <input type="text", id="teste">
-        </form>
+            <h2 class="title">Acompanhamento Siga</h3>
+
+                <div>
+                    <span class="item_selecionavel" data-valor="fornecedores">Fornecedores</span>
+                    <span class="item_selecionavel" data-valor="contratos">Contratos</span>
+                    <span class="item_selecionavel" data-valor="compras_diretas">Compras Diretas</span>
+                    <span class="item_selecionavel" data-valor="outras_compras">Outras Compras</span>
+                </div>
+                
+                <button id="enviar_selecoes">Enviar</button>
         
+                </form>         
+
+        </div>
+        
+
         
 
 
         <div class="container-secundario">
-            Container Secundário
+
+           
+            <div class="resumo">
+                <p><strong>Total de itens adicionados em CONTRATOS: </strong></p>
+                <p><strong>Total de itens excluídos em CONTRATOS: </strong></p>
+                <p><strong>Total de itens adicionado em FORNECEDORES adicionados: </strong></p>
+                <p><strong>Total de itens excluídos em FORNECEDORES: </strong></p>
+            </div>
+
+
+            <form action="/siga/capturar_clique", method = "POST">
+
+            </form>
         </div>
     </div>
 
+<script>
+
+const itensSelecionados = [];
+
+document.querySelectorAll(".item_selecionavel").forEach(item => {
+    item.addEventListener("click", function(event) {
+        event.preventDefault(); // Impede o comportamento padrão de links e botões
+
+        let valor = this.getAttribute("data-valor"); // Obtém o valor do atributo 'data-valor' do item clicado
+
+        if (itensSelecionados.includes(valor)) {
+            // Remove o item da lista se já estiver selecionado
+            const index = itensSelecionados.indexOf(valor);
+            itensSelecionados.splice(index, 1); // Remove o valor do array 'itensSelecionados'
+            this.classList.remove('selecionado'); // Remove a classe 'selecionado' para desmarcar o item
+        } else {
+            // Adiciona o item à lista se não estiver selecionado
+            itensSelecionados.push(valor); // Adiciona o valor ao array 'itensSelecionados'
+            this.classList.add('selecionado'); // Adiciona a classe 'selecionado' para marcar o item
+        }
+
+        console.log("Itens selecionados:", itensSelecionados); // Exibe os itens selecionados no console
+    });
+});
+
+document.getElementById("enviar_selecoes").addEventListener("click", function(event) {
+    event.preventDefault(); // Impede o comportamento padrão do botão
+
+    // Construir a query string
+    const queryString = itensSelecionados.map(item => `filtro=${encodeURIComponent(item)}`).join('&');
+
+    // Redirecionar para a rota GET
+    window.location.href = `/siga/acompanhamento_siga?${queryString}`;
+});
+
+</script>
 </body>
 </html>

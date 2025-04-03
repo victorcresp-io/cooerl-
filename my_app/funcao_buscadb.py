@@ -46,8 +46,6 @@ def ultima_compra_direta(cursor, empresa, data, total):
 
 
 def ultima_compra_outra(cursor, empresa, data, total):
-    if not total:
-        return 0
     print('Iniciando a busca pela última compra usando empresa como parâmetro')
     cursor.execute("SELECT data_aprovacao, id_processo FROM outras_compras WHERE (data_adicao = ? AND fornecedor_vencedor = ?) ORDER BY data_aprovacao DESC LIMIT 1", (data, empresa))
     res = cursor.fetchone()
@@ -61,8 +59,6 @@ def buscar_contratos_cnpj(cursor, cnpj, data):
     cursor.execute("SELECT COUNT(*) AS total_contratos FROM contratos WHERE cpf_cnpj = ? AND data_adicao = ?" ,(cnpj, data))
     resultado = cursor.fetchone()
     resultado = resultado[0]
-    if resultado == None:
-        resultado = 0
     print('O total de contratos foi de: ', resultado)
     
     return resultado
@@ -138,3 +134,25 @@ def comparar_data(data1, data2):
     else:
         data_antiga = data2
     return data_antiga
+
+
+
+
+# FUNÇÃO PARA ACOMPANHAMENTO_SIGA
+
+def consulta_contratos(conn, data2, data1):
+    resultado = conn.execute(""" SELECT COUNT (*) FROM (
+        SELECT id_processo FROM contratos WHERE data_adicao_db = ?
+        EXCEPT
+        SELECT id_processo FROM contratos WHERE data_adicao_db = ?)
+""", (data2, data1)).fetchone()
+    return resultado
+
+
+def consulta_fornecedores(conn, data2, data1):
+    resultado = conn.execute(""" SELECT COUNT (*) FROM (
+        SELECT cpf_cnpj FROM fornecedores WHERE data_adicao_db = ?
+        EXCEPT
+        SELECT cpf_cnpj FROM fornecedores WHERE data_adicao_db = ?)
+""", (data2, data1)).fetchone()
+    return resultado
