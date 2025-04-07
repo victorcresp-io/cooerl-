@@ -13,32 +13,44 @@
 
             <h2 class="title">Acompanhamento Siga</h3>
 
-                <div>
-                    <span class="item_selecionavel" data-valor="fornecedores">Fornecedores</span>
-                    <span class="item_selecionavel" data-valor="contratos">Contratos</span>
-                    <span class="item_selecionavel" data-valor="compras_diretas">Compras Diretas</span>
-                    <span class="item_selecionavel" data-valor="outras_compras">Outras Compras</span>
+
+                <div class="ajuste-data">
+                    <span class="text-data">Filtrar por data: </span>
+
+                    <div class="data1">
+                        <span>Data Início</span>    
+                        <input class="input-data" type="text">
+                    </div>
+                    
+                    <div class="data1">
+                        <span>Data Fim</span>    
+                        <input class="input-data" type="text">
+                    </div>
                 </div>
-                
-                <button id="enviar_selecoes">Enviar</button>
-        
-                </form>         
+
+                    <div class="ajuste">
+                        <span class="item_selecionavel" data-valor="fornecedores">Fornecedores</span>
+                        <span class="item_selecionavel" data-valor="contratos">Contratos</span>
+                        <span class="item_selecionavel" data-valor="compras_diretas">Compras Diretas</span>
+                        <span class="item_selecionavel" data-valor="outras_compras">Outras Compras</span>
+
+
+                    </div>
+                    <div class="butao">
+                        <button class="btn_filtro" type="submit" id="enviar_selecoes">Enviar</button>
+                        <a href="{{ url_for('hello', _external=True) }}" class="back-button">Voltar ao Menu</a>
+                    </div>           
+
 
         </div>
         
-
         
 
 
         <div class="container-secundario">
 
            
-            <div class="resumo">
-                <p><strong>Total de itens adicionados em CONTRATOS: </strong></p>
-                <p><strong>Total de itens excluídos em CONTRATOS: </strong></p>
-                <p><strong>Total de itens adicionado em FORNECEDORES adicionados: </strong></p>
-                <p><strong>Total de itens excluídos em FORNECEDORES: </strong></p>
-            </div>
+
 
 
             <form action="/siga/capturar_clique", method = "POST">
@@ -46,6 +58,20 @@
             </form>
         </div>
     </div>
+
+    <div class="container-itens">
+
+        {% for chave,  item in resultado.items() %}
+        <div class="itens">
+            <h5> Base {{chave}}</h5>
+            <p><strong>Itens Adicionados</strong> {{item[0]}}</p>
+            <p><strong>Itens Excluídos</strong> {{item[1]}} </p>
+            
+        </div>
+        {% endfor %}
+
+    </div>
+
 
 <script>
 

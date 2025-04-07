@@ -1,6 +1,6 @@
 from flask import Blueprint, request, send_file, render_template, flash, redirect, url_for, jsonify
 from my_app.db import get_db, get_db2
-from my_app.funcao_buscadb import buscar_compras, ultima_compra_direta, ultima_compra_outra, buscar_compras_cnpj, ultima_compra_direta_cnpj, ultima_compra_outra_cnpj, comparar_data, consulta_contratos, consulta_fornecedores
+from my_app.funcao_buscadb import buscar_compras, ultima_compra_direta, ultima_compra_outra, buscar_compras_cnpj, ultima_compra_direta_cnpj, ultima_compra_outra_cnpj, comparar_data, consulta_contratos, consulta_fornecedores, consulta_compras_diretas, consulta_outras_compras
 from my_app.funcao_fornecedores import tratar_cnpj, tratar_empresa
 import pandas as pd
 from io import BytesIO
@@ -198,7 +198,9 @@ def acompanhamento_siga():
 
     consultas = {
         'contratos' : lambda: consulta_contratos(conn, data2_att, data1_att),
-        'fornecedores': lambda: consulta_fornecedores(conn, data2_att, data1_att)
+        'fornecedores': lambda: consulta_fornecedores(conn, data2_att, data1_att),
+        'compras_diretas': lambda: consulta_compras_diretas(conn, data2_att, data1_att),
+        'outras_compras' : lambda: consulta_outras_compras(conn, data2_att, data1_att)
     }
 
     filtro = request.args.getlist('filtro')

@@ -25,11 +25,13 @@
         <div class="form-container">
             <h2>Preencha o Formulário</h2>
 
-            <form action="{{ url_for('siga.fornecedores', _external=True) }}" method="POST">
+            <form  action="{{ url_for('siga.fornecedores', _external=True) }}" method="POST">
                 <label for="nome">Nome:</label>
+                <div class="ajustando-sugestoes">
+                    <input class="teste" type="text" id="nome" name="empresa" placeholder="Digite o nome da empresa" style="width: 100%;">
+                    <div id="suggestions" class="suggestions-box"></div>
+                </div>
                 
-                <input type="text" id="nome" name="empresa" placeholder="Digite o nome da empresa" style="width: 100%;">
-                <div id="suggestions" class="suggestions-box"></div>
                 
                 <label id = 'modificando' for="cnpj">CNPJ:</label>
                 <input type="text" id="cnpj" name="cnpj" placeholder="Digite o CNPJ da empresa">

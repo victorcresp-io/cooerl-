@@ -220,3 +220,8 @@ input[type="text"] {
     position: relative;
     z-index: 1100; /* Garante que o input fique acima de outros elementos */
 }
+
+
+.ajustando-sugestoes {
+    position: relative;
+}

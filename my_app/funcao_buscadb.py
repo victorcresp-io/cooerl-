@@ -140,19 +140,89 @@ def comparar_data(data1, data2):
 
 # FUNÇÃO PARA ACOMPANHAMENTO_SIGA
 
-def consulta_contratos(conn, data2, data1):
+def consulta_contratos_exclusao(conn, data2, data1):
+    resultado = conn.execute(""" SELECT COUNT (*) FROM (
+        SELECT id_processo FROM contratos WHERE data_adicao_db = ?
+        EXCEPT
+        SELECT id_processo FROM contratos WHERE data_adicao_db = ?)
+""", (data1, data2)).fetchone()
+    
+
+    return resultado[0]
+
+
+def consulta_fornecedores_exclusao(conn, data2, data1):
+    resultado = conn.execute(""" SELECT COUNT (*) FROM (
+        SELECT cpf_cnpj FROM fornecedores WHERE data_adicao_db = ?
+        EXCEPT
+        SELECT cpf_cnpj FROM fornecedores WHERE data_adicao_db = ?)
+""", (data1, data2)).fetchone()
+    return resultado[0]
+
+def consulta_contratos(conn, data2, data1, resultado_exclusao = 0):
     resultado = conn.execute(""" SELECT COUNT (*) FROM (
         SELECT id_processo FROM contratos WHERE data_adicao_db = ?
         EXCEPT
         SELECT id_processo FROM contratos WHERE data_adicao_db = ?)
 """, (data2, data1)).fetchone()
-    return resultado
+    
+    resultado_exclusao = consulta_contratos_exclusao(conn, data2, data1)
+
+    return resultado[0], resultado_exclusao
 
 
-def consulta_fornecedores(conn, data2, data1):
+def consulta_fornecedores(conn, data2, data1, resultado_exclusao = 0):
     resultado = conn.execute(""" SELECT COUNT (*) FROM (
         SELECT cpf_cnpj FROM fornecedores WHERE data_adicao_db = ?
         EXCEPT
         SELECT cpf_cnpj FROM fornecedores WHERE data_adicao_db = ?)
 """, (data2, data1)).fetchone()
-    return resultado
+    
+    resultado_exclusao = consulta_fornecedores_exclusao(conn, data2, data1)
+    return resultado[0], resultado_exclusao
+
+
+
+#FUNCAO PARA COMPRAS
+
+
+def consulta_compras_diretas_exclusao(conn, data2, data1):
+    resultado = conn.execute(""" SELECT COUNT (*) FROM (
+        SELECT id_processo FROM compras_diretas WHERE data_adicao_db = ?
+        EXCEPT
+        SELECT id_processo FROM compras_diretas WHERE data_adicao_db = ?)
+""", (data1, data2)).fetchone()
+    
+
+    return resultado[0]
+
+
+def consulta_compras_diretas_exclusao(conn, data2, data1):
+    resultado = conn.execute(""" SELECT COUNT (*) FROM (
+        SELECT cpf_cnpj FROM outras_compras WHERE data_adicao_db = ?
+        EXCEPT
+        SELECT cpf_cnpj FROM outras_compras WHERE data_adicao_db = ?)
+""", (data1, data2)).fetchone()
+    return resultado[0]
+
+def consulta_compras_diretas(conn, data2, data1, resultado_exclusao = 0):
+    resultado = conn.execute(""" SELECT COUNT (*) FROM (
+        SELECT id_processo FROM compras_diretas WHERE data_adicao_db = ?
+        EXCEPT
+        SELECT id_processo FROM compras_diretas WHERE data_adicao_db = ?)
+""", (data2, data1)).fetchone()
+    
+    resultado_exclusao = consulta_compras_diretas_exclusao(conn, data2, data1)
+
+    return resultado[0], resultado_exclusao
+
+
+def consulta_outras_compras(conn, data2, data1, resultado_exclusao = 0):
+    resultado = conn.execute(""" SELECT COUNT (*) FROM (
+        SELECT cpf_cnpj FROM outras_compras WHERE data_adicao_db = ?
+        EXCEPT
+        SELECT cpf_cnpj FROM outras_compras WHERE data_adicao_db = ?)
+""", (data2, data1)).fetchone()
+    
+    resultado_exclusao = consulta_fornecedores_exclusao(conn, data2, data1)
+    return resultado[0], resultado_exclusao
