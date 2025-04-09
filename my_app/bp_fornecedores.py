@@ -1,6 +1,6 @@
 from flask import Blueprint, request, send_file, render_template, flash, redirect, url_for, jsonify
 from my_app.db import get_db, get_db2
-from my_app.funcao_buscadb import buscar_compras, ultima_compra_direta, ultima_compra_outra, buscar_compras_cnpj, ultima_compra_direta_cnpj, ultima_compra_outra_cnpj, comparar_data, consulta_contratos, consulta_fornecedores, consulta_compras_diretas, consulta_outras_compras
+from my_app.funcao_buscadb import buscar_compras, ultima_compra_direta, ultima_compra_outra, buscar_compras_cnpj, ultima_compra_direta_cnpj, ultima_compra_outra_cnpj, comparar_data, consulta_contratos, consulta_fornecedores, consulta_compras_diretas, consulta_outras_compras, teste_sql
 from my_app.funcao_fornecedores import tratar_cnpj, tratar_empresa
 import pandas as pd
 from io import BytesIO
@@ -23,7 +23,8 @@ def fornecedores():
     situacao = None
     empresa_filtro = None
     cnpj_db = None
-
+    data = '22/03/2025'
+    data = datetime.strptime(data, '%d/%m/%Y').date()
     time_inicio = time.time()
 
     """ Rota para processar a requisição e redirecionar para o download """
@@ -40,8 +41,6 @@ def fornecedores():
         cursor = db.cursor()
         tempo1 = time.time()
         print('Conexão com banco de dados feita com sucesso!')
-        data = '22/03/2025'
-        data = datetime.strptime(data, '%d/%m/%Y').date()
         print('Data usada como parâmetro: ', data)
         try:
             cursor.execute('SELECT cpf_cnpj, situacao FROM fornecedores WHERE fornecedor = ? AND data_adicao = ?' , (empresa_filtro, data))
@@ -96,18 +95,18 @@ def fornecedores():
 
         except Exception as e:
             flash('Empresa não encontrada, verifique o nome ou cnpj', category= 'error')
-
+        
 
                 
-            return render_template('fornecedores.html', resumo = resumo, empresa_filtro = empresa_db, cnpj_filtro = cnpj_db)
+            return render_template('fornecedores.html', resumo = resumo, empresa_filtro = empresa_filtro, cnpj_filtro = cnpj_db)
         except Exception as e:
             print('Aconteceu o seguinte erro:', e)
 
 
     
+    print('até aqui ok', empresa_filtro)
 
-
-    return render_template('fornecedores.html', resumo = resumo, empresa_filtro = empresa_db, cnpj_filtro = cnpj_db)
+    return render_template('fornecedores.html', resumo = resumo, empresa_filtro = empresa_filtro, cnpj_filtro = cnpj_db, data_recente = data)
 
 
 @bp.route('/get_fornecedores', methods=['GET'])
@@ -137,9 +136,10 @@ def get_fornecedores():
 def excel_download():
     """ Rota para gerar o arquivo Excel diretamente do banco """
     empresa = request.args.get('empresa_filtro')
-    print(empresa)
+    print('termo empresa', empresa)
     cnpj = request.args.get('cnpj_filtro')
-    data = datetime.now().date()
+    data = request.args.get('data_recente')
+    print(data)
     #print(empresa)
     print(cnpj)
 
@@ -191,7 +191,7 @@ def excel_download():
 def acompanhamento_siga():
     conn = get_db2()
     data1 = '28/03/2025'
-    data2 = '01/04/2025'
+    data2 = '09/04/2025'
 
     data1_att = datetime.strptime(data1, '%d/%m/%Y').date()
     data2_att = datetime.strptime(data2, '%d/%m/%Y').date()
@@ -201,29 +201,38 @@ def acompanhamento_siga():
         'fornecedores': lambda: consulta_fornecedores(conn, data2_att, data1_att),
         'compras_diretas': lambda: consulta_compras_diretas(conn, data2_att, data1_att),
         'outras_compras' : lambda: consulta_outras_compras(conn, data2_att, data1_att)
+    
     }
 
-    filtro = request.args.getlist('filtro')
+    filtro = request.args.getlist('filtro') #capturando do javascript
     print(consultas['contratos'])
 
     print(f"Filtro clicado: {filtro}")
     resultado = {}
+    data_frames = {}
     for item in filtro:
-        if item in consultas:
-            print(consultas[item])
-            consulta_sql = consultas[item]
-            print(consulta_sql)
-            print('Iniciando pelo comando de ', item)
-            try: 
-                resultado[item] = consultas[item]()
-                
-            except Exception as e:
-                print(f'Erro ao executar consulta para {item}: {e}')
-    print(resultado)
-    return render_template('acompanhamento_siga.html', resultado = resultado)
+        resultado[item] = consultas[item]()
+        conn.execute('')
+    print('o resultado está aqui', resultado)
+    print(type(resultado))
+
+
+    dicionario = resultado.keys()
+    
+    
+    return render_template('acompanhamento_siga.html', resultado = resultado, filtro = filtro)
+
+
+@bp.route('/excel_download_acompanhamento_siga')
+def excel_download_acompanhamento():
+    filtros_selecionados = request.args.getlist('filtro')
+    print(filtros_selecionados)
+    return 'tudo ok'
 
 @bp.route('/financeiro_siga')
 def financeiro_siga():
     return 'td ok'
+
+
 
 

@@ -141,45 +141,73 @@ def comparar_data(data1, data2):
 # FUNÇÃO PARA ACOMPANHAMENTO_SIGA
 
 def consulta_contratos_exclusao(conn, data2, data1):
-    resultado = conn.execute(""" SELECT COUNT (*) FROM (
+    resultado = conn.execute("""
         SELECT id_processo FROM contratos WHERE data_adicao_db = ?
         EXCEPT
-        SELECT id_processo FROM contratos WHERE data_adicao_db = ?)
-""", (data1, data2)).fetchone()
-    
+        SELECT id_processo FROM contratos WHERE data_adicao_db = ?
+""", (data1, data2)).fetchall()
+    resultado = 0
+    total_excluido = 0
+    if resultado is not None:
+        data_excluido = resultado
+        total_excluido = len(data_excluido)
+        return resultado, total_excluido
 
-    return resultado[0]
+    return resultado, total_excluido
 
 
 def consulta_fornecedores_exclusao(conn, data2, data1):
-    resultado = conn.execute(""" SELECT COUNT (*) FROM (
+    resultado = conn.execute("""
         SELECT cpf_cnpj FROM fornecedores WHERE data_adicao_db = ?
         EXCEPT
-        SELECT cpf_cnpj FROM fornecedores WHERE data_adicao_db = ?)
-""", (data1, data2)).fetchone()
-    return resultado[0]
+        SELECT cpf_cnpj FROM fornecedores WHERE data_adicao_db = ?
+""", (data1, data2)).fetchall()
+    resultado = 0
+    total_excluido = 0
+    if resultado is not None:
+        data_excluido = resultado
+        total_excluido = len(data_excluido)
+    
+    return total_excluido, data_excluido
 
-def consulta_contratos(conn, data2, data1, resultado_exclusao = 0):
-    resultado = conn.execute(""" SELECT COUNT (*) FROM (
+def consulta_contratos(conn, data2, data1):
+    resultado = conn.execute("""
         SELECT id_processo FROM contratos WHERE data_adicao_db = ?
         EXCEPT
-        SELECT id_processo FROM contratos WHERE data_adicao_db = ?)
-""", (data2, data1)).fetchone()
-    
+        SELECT id_processo FROM contratos WHERE data_adicao_db = ?
+""", (data2, data1)).fetchall()
+    data_adicionado = 0 
+    total_adicionado = 0
+    if resultado is not None:
+        data_adicionado = resultado
+        total_adicionado = len(data_adicionado)
+        return data_adicionado, total_adicionado
     resultado_exclusao = consulta_contratos_exclusao(conn, data2, data1)
+    data_excluido = resultado_exclusao[0]
+    total_excluido = resultado_exclusao[1]
 
-    return resultado[0], resultado_exclusao
+    return total_adicionado, data_adicionado, total_excluido, data_excluido
 
 
-def consulta_fornecedores(conn, data2, data1, resultado_exclusao = 0):
-    resultado = conn.execute(""" SELECT COUNT (*) FROM (
+def consulta_fornecedores(conn, data2, data1):
+    resultado = conn.execute("""
         SELECT cpf_cnpj FROM fornecedores WHERE data_adicao_db = ?
         EXCEPT
-        SELECT cpf_cnpj FROM fornecedores WHERE data_adicao_db = ?)
-""", (data2, data1)).fetchone()
+        SELECT cpf_cnpj FROM fornecedores WHERE data_adicao_db = ?
+""", (data2, data1)).fetchall()
+    data_adicionado = 0
+    total_adicionado = 0
+    if resultado is not None:
+        data_adicionado = resultado
+        total_adicionado = len(resultado)
+        return data_adicionado, total_adicionado
     
     resultado_exclusao = consulta_fornecedores_exclusao(conn, data2, data1)
-    return resultado[0], resultado_exclusao
+
+    data_excluido = resultado_exclusao[0]
+    total_excluido = resultado_exclusao[1]
+
+    return total_adicionado, data_adicionado, total_excluido, data_excluido
 
 
 
@@ -187,42 +215,98 @@ def consulta_fornecedores(conn, data2, data1, resultado_exclusao = 0):
 
 
 def consulta_compras_diretas_exclusao(conn, data2, data1):
-    resultado = conn.execute(""" SELECT COUNT (*) FROM (
+    resultado = conn.execute("""
         SELECT id_processo FROM compras_diretas WHERE data_adicao_db = ?
         EXCEPT
-        SELECT id_processo FROM compras_diretas WHERE data_adicao_db = ?)
-""", (data1, data2)).fetchone()
+        SELECT id_processo FROM compras_diretas WHERE data_adicao_db = ?
+""", (data1, data2)).fetchall()
+    data_excluido = 0
+    total_excluido = 0
+    if resultado is not None:
+        data_excluido = resultado
+        total_excluido = len(data_excluido)
     
 
-    return resultado[0]
+    return data_excluido, total_excluido
 
 
-def consulta_compras_diretas_exclusao(conn, data2, data1):
-    resultado = conn.execute(""" SELECT COUNT (*) FROM (
+def consulta_outras_compras_exclusao(conn, data2, data1):
+    resultado = conn.execute(""" 
         SELECT cpf_cnpj FROM outras_compras WHERE data_adicao_db = ?
         EXCEPT
-        SELECT cpf_cnpj FROM outras_compras WHERE data_adicao_db = ?)
-""", (data1, data2)).fetchone()
-    return resultado[0]
+        SELECT cpf_cnpj FROM outras_compras WHERE data_adicao_db = ?
+""", (data1, data2)).fetchall()
+    data_excluido = 0
+    total_excluido = 0
+    if resultado is not None:
+        data_excluido = resultado
+        total_excluido = len(data_excluido)
+    
 
-def consulta_compras_diretas(conn, data2, data1, resultado_exclusao = 0):
-    resultado = conn.execute(""" SELECT COUNT (*) FROM (
+    return data_excluido, total_excluido
+
+def consulta_compras_diretas(conn, data2, data1):
+    resultado = conn.execute("""
         SELECT id_processo FROM compras_diretas WHERE data_adicao_db = ?
         EXCEPT
-        SELECT id_processo FROM compras_diretas WHERE data_adicao_db = ?)
-""", (data2, data1)).fetchone()
-    
+        SELECT id_processo FROM compras_diretas WHERE data_adicao_db = ?
+""", (data2, data1)).fetchall()
+    data_adicionado = 0
+    total_adicionado = 0
+    if resultado is not None:
+        data_adicionado = resultado
+        total_adicionado = len(data_adicionado)
     resultado_exclusao = consulta_compras_diretas_exclusao(conn, data2, data1)
 
-    return resultado[0], resultado_exclusao
+    data_excluido = resultado_exclusao[0]
+    total_excluido = resultado_exclusao[1]
+
+    return data_adicionado, total_adicionado, data_excluido, total_excluido
 
 
-def consulta_outras_compras(conn, data2, data1, resultado_exclusao = 0):
-    resultado = conn.execute(""" SELECT COUNT (*) FROM (
+def consulta_outras_compras(conn, data2, data1, data_adicionado = 0, data_excluido = 0):
+    resultado = conn.execute(""" 
         SELECT cpf_cnpj FROM outras_compras WHERE data_adicao_db = ?
         EXCEPT
-        SELECT cpf_cnpj FROM outras_compras WHERE data_adicao_db = ?)
-""", (data2, data1)).fetchone()
+        SELECT cpf_cnpj FROM outras_compras WHERE data_adicao_db = ?
+""", (data2, data1)).fetchall()
+    if resultado is not None:
+        data_adicionado = resultado
+        total_adicionado = len(data_adicionado)
+    resultado_exclusao = consulta_outras_compras_exclusao(conn, data2, data1)
+
+    data_excluido = resultado_exclusao[0]
+    total_excluido = resultado_exclusao[1]
+
+    return data_adicionado, total_adicionado, data_excluido, total_excluido
+
+
+def criar_dataframe(conn, ids, base):
+    query = f"""
+    SELECT n.*, r.*
+    FROM ids
+    NATURAL JOIN {base} r ON (n.id_processo = r.id_processo)
+"""
     
-    resultado_exclusao = consulta_fornecedores_exclusao(conn, data2, data1)
-    return resultado[0], resultado_exclusao
+
+#FUNÇÃO PARA EXCEL DO ACOMPANHAMENTO SIGA
+
+
+def teste_sql(conn, data1, data2, base):
+
+
+    res = conn.execute(f"""
+    SELECT id_processo FROM {base} WHERE data_adicao_db = ?
+    EXCEPT
+    SELECT id_processo FROM {base} WHERE data_adicao_db = ?
+    """, (data2, data1)).df()
+    print(res)
+    
+
+    resultado_df = conn.execute(f"""
+        SELECT n.*, r.*
+        FROM res n
+        JOIN {base} r ON (n.id_processo = r.id_processo)
+    """).df()
+
+    return resultado_df
