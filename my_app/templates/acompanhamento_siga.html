@@ -39,7 +39,7 @@
                     <div class="butao">
                         <button class="btn_filtro" type="submit" id="enviar_selecoes">Enviar</button>
                         <a href="{{ url_for('hello', _external=True) }}" class="back-button">Voltar ao Menu</a>
-                        <a href="{{ url_for('siga.excel_download_acompanhamento', filtro = filtro  ) }}" class="back-button">Baixar Excel</a>
+                        <a href="{{ url_for('siga.excel_download_acompanhamento', filtro = filtro, df=df  ) }}" class="back-button">Baixar Excel</a>
                     </div>           
 
 
@@ -65,8 +65,8 @@
         {% for chave,  item in resultado.items() %}
         <div class="itens">
             <h5> Base {{chave}}</h5>
-            <p><strong>Itens Adicionados</strong> {{item[1]}}</p>
-            <p><strong>Itens Excluídos</strong> {{item[3]}} </p>
+            <p><strong>Itens Adicionados</strong> {{item[0]}}</p>
+            <p><strong>Itens Excluídos</strong> {{item[2]}} </p>
             
         </div>
         {% endfor %}

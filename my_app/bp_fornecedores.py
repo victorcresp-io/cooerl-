@@ -1,6 +1,6 @@
 from flask import Blueprint, request, send_file, render_template, flash, redirect, url_for, jsonify
 from my_app.db import get_db, get_db2
-from my_app.funcao_buscadb import buscar_compras, ultima_compra_direta, ultima_compra_outra, buscar_compras_cnpj, ultima_compra_direta_cnpj, ultima_compra_outra_cnpj, comparar_data, consulta_contratos, consulta_fornecedores, consulta_compras_diretas, consulta_outras_compras, teste_sql
+from my_app.funcao_buscadb import buscar_compras, ultima_compra_direta, ultima_compra_outra, buscar_compras_cnpj, ultima_compra_direta_cnpj, ultima_compra_outra_cnpj, comparar_data, consulta_contratos, consulta_fornecedores, consulta_compras_diretas, consulta_outras_compras
 from my_app.funcao_fornecedores import tratar_cnpj, tratar_empresa
 import pandas as pd
 from io import BytesIO
@@ -190,7 +190,7 @@ def excel_download():
 @bp.route('/acompanhamento_siga', methods = ['GET'])
 def acompanhamento_siga():
     conn = get_db2()
-    data1 = '28/03/2025'
+    data1 = '10/04/2025'
     data2 = '09/04/2025'
 
     data1_att = datetime.strptime(data1, '%d/%m/%Y').date()
@@ -206,6 +206,7 @@ def acompanhamento_siga():
 
     filtro = request.args.getlist('filtro') #capturando do javascript
     print(consultas['contratos'])
+    df = ''
 
     print(f"Filtro clicado: {filtro}")
     resultado = {}
@@ -216,18 +217,37 @@ def acompanhamento_siga():
     print('o resultado está aqui', resultado)
     print(type(resultado))
 
+    
 
-    dicionario = resultado.keys()
+
     
-    
-    return render_template('acompanhamento_siga.html', resultado = resultado, filtro = filtro)
+    return render_template('acompanhamento_siga.html', resultado = resultado, filtro = filtro, df = df)
 
 
 @bp.route('/excel_download_acompanhamento_siga')
 def excel_download_acompanhamento():
     filtros_selecionados = request.args.getlist('filtro')
-    print(filtros_selecionados)
-    return 'tudo ok'
+    df = request.args.get('df')
+    print(df)
+    conn = get_db2()
+    resultado = conn.execute('SELECT * FROM t1_contratos').df()
+    resultado['data_adicao_db'] = resultado['data_adicao_db'].astype(str) #mostrar a data no excel sem hora, minuto, segundo
+
+    resultado_fornecedores = conn.execute('SELECT * FROM t1_fornecedores').df()
+    resultado_fornecedores['data_adicao_db'] = resultado_fornecedores['data_adicao_db'].astype(str)
+    print(resultado_fornecedores)
+    buffer = BytesIO()
+
+    with pd.ExcelWriter(buffer, engine = 'openpyxl') as writer:
+        resultado.to_excel(writer, index = False, sheet_name = 'Contratos')
+        resultado_fornecedores.to_excel(writer, index = False, sheet_name = 'Fornecedores')
+    buffer.seek(0)
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name = 'teste.xlsx',
+        mimetype='application/vnds.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
 
 @bp.route('/financeiro_siga')
 def financeiro_siga():

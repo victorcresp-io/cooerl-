@@ -138,20 +138,24 @@ def comparar_data(data1, data2):
 
 
 
+
+
 # FUNÇÃO PARA ACOMPANHAMENTO_SIGA
+
+from my_app.funcao_tabela_filtro_dados import dataframe_contratos, dataframe_fornecedores
 
 def consulta_contratos_exclusao(conn, data2, data1):
     resultado = conn.execute("""
         SELECT id_processo FROM contratos WHERE data_adicao_db = ?
         EXCEPT
         SELECT id_processo FROM contratos WHERE data_adicao_db = ?
-""", (data1, data2)).fetchall()
-    resultado = 0
+""", (data2, data1)).fetchall()
+    data_excluido = 0
     total_excluido = 0
-    if resultado is not None:
+    if resultado:
         data_excluido = resultado
         total_excluido = len(data_excluido)
-        return resultado, total_excluido
+
 
     return resultado, total_excluido
 
@@ -161,46 +165,40 @@ def consulta_fornecedores_exclusao(conn, data2, data1):
         SELECT cpf_cnpj FROM fornecedores WHERE data_adicao_db = ?
         EXCEPT
         SELECT cpf_cnpj FROM fornecedores WHERE data_adicao_db = ?
-""", (data1, data2)).fetchall()
-    resultado = 0
+""", (data2, data1)).fetchall()
+    data_excluido = 0
     total_excluido = 0
-    if resultado is not None:
+    if resultado:
         data_excluido = resultado
         total_excluido = len(data_excluido)
     
     return total_excluido, data_excluido
 
 def consulta_contratos(conn, data2, data1):
-    resultado = conn.execute("""
-        SELECT id_processo FROM contratos WHERE data_adicao_db = ?
-        EXCEPT
-        SELECT id_processo FROM contratos WHERE data_adicao_db = ?
-""", (data2, data1)).fetchall()
+    ids_adicionados = dataframe_contratos(conn, data1, data2)
     data_adicionado = 0 
     total_adicionado = 0
-    if resultado is not None:
-        data_adicionado = resultado
+    print(data_adicionado)
+    if ids_adicionados:
+        data_adicionado = ids_adicionados
+        print(data_adicionado)
         total_adicionado = len(data_adicionado)
-        return data_adicionado, total_adicionado
     resultado_exclusao = consulta_contratos_exclusao(conn, data2, data1)
     data_excluido = resultado_exclusao[0]
     total_excluido = resultado_exclusao[1]
+
+
 
     return total_adicionado, data_adicionado, total_excluido, data_excluido
 
 
 def consulta_fornecedores(conn, data2, data1):
-    resultado = conn.execute("""
-        SELECT cpf_cnpj FROM fornecedores WHERE data_adicao_db = ?
-        EXCEPT
-        SELECT cpf_cnpj FROM fornecedores WHERE data_adicao_db = ?
-""", (data2, data1)).fetchall()
+    resultado = dataframe_fornecedores(conn, data1, data2)
     data_adicionado = 0
     total_adicionado = 0
-    if resultado is not None:
+    if resultado:
         data_adicionado = resultado
         total_adicionado = len(resultado)
-        return data_adicionado, total_adicionado
     
     resultado_exclusao = consulta_fornecedores_exclusao(conn, data2, data1)
 
@@ -264,7 +262,7 @@ def consulta_compras_diretas(conn, data2, data1):
     return data_adicionado, total_adicionado, data_excluido, total_excluido
 
 
-def consulta_outras_compras(conn, data2, data1, data_adicionado = 0, data_excluido = 0):
+def consulta_outras_compras(conn, data2, data1):
     resultado = conn.execute(""" 
         SELECT cpf_cnpj FROM outras_compras WHERE data_adicao_db = ?
         EXCEPT
@@ -292,21 +290,3 @@ def criar_dataframe(conn, ids, base):
 #FUNÇÃO PARA EXCEL DO ACOMPANHAMENTO SIGA
 
 
-def teste_sql(conn, data1, data2, base):
-
-
-    res = conn.execute(f"""
-    SELECT id_processo FROM {base} WHERE data_adicao_db = ?
-    EXCEPT
-    SELECT id_processo FROM {base} WHERE data_adicao_db = ?
-    """, (data2, data1)).df()
-    print(res)
-    
-
-    resultado_df = conn.execute(f"""
-        SELECT n.*, r.*
-        FROM res n
-        JOIN {base} r ON (n.id_processo = r.id_processo)
-    """).df()
-
-    return resultado_df
