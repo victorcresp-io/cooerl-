@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/css/pncp.css">
+    <title>Document</title>
+</head>
+<body>
+    <div class="centralizar">
+
+           <form class="pesquisa-termo" action="{{url_for('siga.financeiro_siga')}}" method="post">
+            <label for="busca">Insira o termo chave</label>
+            <input class="input-termo" type="text" id="busca" name="busca" placeholder="Digite um termo">
+            <button type="submit">Enviar</button>
+           </form>
+    
+
+        <div class="ajustar-caixa-filtro">
+            <div>
+                <h4>Modalidade</h4>
+            </div>
+
+            <div class="opcao-filtro">
+                <label><input class="ajuste-input" type="radio" name="fruta" value="maçã"> teste1</label>
+                <label><input class="ajuste-input" type="radio" name="fruta" value="maçã"> teste2</label>
+                <label><input class="ajuste-input" type="radio" name="fruta" value="maçã"> teste3</label>
+            </div>
+
+            <a href="{{url_for('siga.excel_download_pncp')}}">Baixar Excel</a>
+
+        </div>
+    </div>
+</body>
+</html>

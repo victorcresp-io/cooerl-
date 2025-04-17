@@ -2,6 +2,7 @@ from flask import Blueprint, request, send_file, render_template, flash, redirec
 from my_app.db import get_db, get_db2
 from my_app.funcao_buscadb import buscar_compras, ultima_compra_direta, ultima_compra_outra, buscar_compras_cnpj, ultima_compra_direta_cnpj, ultima_compra_outra_cnpj, comparar_data, consulta_contratos, consulta_fornecedores, consulta_compras_diretas, consulta_outras_compras
 from my_app.funcao_fornecedores import tratar_cnpj, tratar_empresa
+from my_app.funcao_pncp import buscar_pncp_termo
 import pandas as pd
 from io import BytesIO
 import time
@@ -190,8 +191,8 @@ def excel_download():
 @bp.route('/acompanhamento_siga', methods = ['GET'])
 def acompanhamento_siga():
     conn = get_db2()
-    data1 = '10/04/2025'
-    data2 = '09/04/2025'
+    data1 = '11/04/2025' #data recente 
+    data2 = '10/04/2025'
 
     data1_att = datetime.strptime(data1, '%d/%m/%Y').date()
     data2_att = datetime.strptime(data2, '%d/%m/%Y').date()
@@ -230,7 +231,7 @@ def excel_download_acompanhamento():
     df = request.args.get('df')
     print(df)
     conn = get_db2()
-    resultado = conn.execute('SELECT * FROM t1_contratos').df()
+    resultado = conn.execute('SELECT * FROM t1_contratos WHERE data_adicao_db = ?',  ).df()
     resultado['data_adicao_db'] = resultado['data_adicao_db'].astype(str) #mostrar a data no excel sem hora, minuto, segundo
 
     resultado_fornecedores = conn.execute('SELECT * FROM t1_fornecedores').df()
@@ -249,10 +250,35 @@ def excel_download_acompanhamento():
         mimetype='application/vnds.openxmlformats-officedocument.spreadsheetml.sheet'
     )
 
-@bp.route('/financeiro_siga')
+@bp.route('/financeiro_siga', methods = ['POST', 'GET'])
 def financeiro_siga():
-    return 'td ok'
+    data_inicio = '01/01/2024'
+    data_fim = '15/04/2025'
+    data_inicio_att = datetime.strptime(data_inicio, '%d/%m/%Y').year
+    data_fim_att = datetime.strptime(data_fim, '%d/%m/%Y').year
+    termo = request.form.get('busca')
+    if request.method == 'POST':
+        buscar_pncp_termo(termo, data_inicio_att, data_fim_att)
+        print(termo)
+    return render_template('pncp.html')
 
+@bp.route('/excel_download_pncp')
+def excel_download_pncp():
+    con = get_db2()
 
+    resultado_df = con.execute("SELECT * FROM teste_pncp").df()
+    print(resultado_df.info())
+    
+    buffer = BytesIO()
+    with pd.ExcelWriter(buffer, engine = 'openpyxl') as writer:
+        resultado_df.to_excel(writer, index = False, sheet_name = 'Contratos-PNCP')
+    buffer.seek(0)
+    con.execute('TRUNCATE teste_pncp')
+    return send_file(
+        buffer,
+        as_attachment=True,
+        download_name='pncp-teste.xlsx',
+        mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+    )
 
 

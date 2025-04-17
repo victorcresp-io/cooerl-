@@ -1,0 +1,54 @@
+body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to bottom, #f0f0f0, #d3d3d3);
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+.centralizar{
+    min-width: 60%;
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    flex-wrap: wrap;
+    background-color: white;
+}
+
+.pesquisa-termo{
+    display: flex;
+    flex-direction: column;
+    min-width: 30%;
+    gap: 8px;
+    font-size: 20px;
+}
+
+.input-termo{
+    padding: 5px;
+}
+.ajustar-caixa-filtro{
+    display: flex;
+    flex-direction: column;
+}
+
+.opcao-filtro{
+    margin-top: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    height: 100%;
+    width: 100%;
+}
+
+h4{
+    margin: 0;
+    margin-left: 3px;
+}
+.ajuste-input{
+    transform: scale(1.5); /* aumenta o tamanho visual da bolinha */
+    margin-right: 8px;     /* espaçamento entre bolinha e texto */
+    cursor: pointer;      
+}

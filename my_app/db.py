@@ -4,7 +4,7 @@ from datetime import datetime
 from flask import current_app, g
 import duckdb
 
-caminho2 = r"Y:\database_siga\bancodedados.duckdb"
+caminho2 = r"Y:\database_siga\banco_de_dados.duckdb"
 def get_db2():
     conexao = duckdb.connect(caminho2)
     return conexao
