@@ -1,6 +1,26 @@
 -- Criação do SCHEMA relacionado a rota PNCP.
 
 
+CREATE TABLE IF NOT EXISTS tipo_contrato (
+    tipo_contrato_id INT UNIQUE,
+    nome VARCHAR 
+);
+
+CREATE TABLE IF NOT EXISTS categoria_processo (
+    categoria_processo_id INT UNIQUE,
+    nome VARCHAR 
+);
+
+CREATE TABLE IF NOT EXISTS esfera_adm(
+    esfera_adm_id INT UNIQUE,
+    esfera_nome VARCHAR
+);
+
+CREATE TABLE IF NOT EXISTS esfera_poder(
+    esfera_poder_id INTEGER UNIQUE,
+    esfera_poder_nome VARCHAR
+);
+
 CREATE TABLE IF NOT EXISTS contrato_pncp (
     numero_controle_pncp_compra BIGINT,
     numero_controle_pncp BIGINT,
@@ -15,46 +35,24 @@ CREATE TABLE IF NOT EXISTS contrato_pncp (
     valor_parcela INT,
     valor_global FLOAT,
     valor_acumulado FLOAT
-)
+);
 
 CREATE TABLE IF NOT EXISTS informacao_contrato(
-    data_atualizacao TIMESTAMP
+    data_atualizacao TIMESTAMP,
     informacao_complementar VARCHAR,
     receita BOOLEAN,
     numero_alteracao_pncp INT, -- Quantidade de vezes que o registro foi alterado no PNCP
     tipo_contrato_id INT REFERENCES tipo_contrato(tipo_contrato_id),
     categoria_processo_id INT REFERENCES categoria_processo(categoria_processo_id),
     empenho_contrato INT,
-    data_atualizacao_global TIMESTAMP
-    identificar_cipi VARCHAR --Verificar
+    data_atualizacao_global TIMESTAMP,
+    identificar_cipi VARCHAR, --Verificar
     url_cipi VARCHAR,
-    usuario_nome VARCHAR,
+    usuario_nome VARCHAR
 
-)
+);
 
-CREATE TABLE IF NOT EXISTS tipo_contrato (
-    tipo_contrato_id INT UNIQUE,
-    nome VARCHAR 
-)
 
-CREATE TABLE IF NOT EXISTS categoria_processo (
-    categoria_processo_id INT UNIQUE,
-    nome VARCHAR 
-)
-
-CREATE TABLE IF NOT EXISTS orgao(
-    orgao VARCHAR,
-    cnpj BIGINT,
-    poder_id INT,
-    efera_id INT
-)
-
-CREATE TABLE IF NOT EXISTS orgao_subrogado(
-    orgao VARCHAR,
-    cnpj BIGINT,
-    poder_id INT,
-    efera_id INT
-)
 
 CREATE TABLE IF NOT EXISTS unidade_orgao(
     unidade VARCHAR,
@@ -64,7 +62,7 @@ CREATE TABLE IF NOT EXISTS unidade_orgao(
     sigla_uf VARCHAR,
     municipio VARCHAR,
 
-)
+);
 CREATE TABLE IF NOT EXISTS unidade_subrogada(
     unidade VARCHAR,
     codigo_ibge INT,
@@ -73,18 +71,32 @@ CREATE TABLE IF NOT EXISTS unidade_subrogada(
     sigla_uf VARCHAR,
     municipio VARCHAR,
     
-)
+);
 
 CREATE TABLE IF NOT EXISTS fornecedor(
     tipo_pessoa VARCHAR,
     codigo_pais VARCHAR,
     nome VARCHAR,
-    cnpj BIGINT,
+    cnpj BIGINT
 
-)
+);
 
 
-CREATE TABLE IF NOT EXISTS fornecedor(
+CREATE TABLE IF NOT EXISTS fornecedor_sub(
     nome VARCHAR,
+    cnpj BIGINT
+);
+
+CREATE TABLE IF NOT EXISTS orgao(
+    orgao VARCHAR,
     cnpj BIGINT,
-)
+    poder_id INT REFERENCES esfera_poder(esfera_poder_id),
+    esfera_id INT REFERENCES esfera_adm(esfera_adm_id)
+);
+
+CREATE TABLE IF NOT EXISTS orgao_subrogado(
+    orgao VARCHAR,
+    cnpj BIGINT,
+    poder_id INT REFERENCES esfera_poder(esfera_poder_id),
+    esfera_id INT REFERENCES esfera_adm(esfera_adm_id)
+);
