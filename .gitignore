@@ -1,5 +1,6 @@
 terminal/
 instance/
+.vscode/
 __pycache__
 .pytest_cache
 freeze
