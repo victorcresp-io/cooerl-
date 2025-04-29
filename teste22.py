@@ -1,9 +1,17 @@
 import duckdb 
 
-caminho = r"C:\Users\victor.crespo\Downloads\Nova pasta\pncp_contratos.duckdb"
-conectar = duckdb.connect(caminho)
+caminho = r"Y:\database_siga\teste.duckdb2"
 
-teste = conectar.execute("SHOW TABLES").fetchall()
+conn = duckdb.connect(caminho)
 
 
-print(teste)
+
+with open('my_app/db/schema_pncp.sql', 'r') as f:
+    sql_query = f.read()
+    conn.execute(sql_query)
+
+teste = conn.execute("SHOW TABLES").fetchall()
+
+for item in teste:
+    print(item)
+

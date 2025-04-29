@@ -22,12 +22,12 @@ CREATE TABLE IF NOT EXISTS esfera_poder(
 );
 
 CREATE TABLE IF NOT EXISTS contrato_pncp (
-    numero_controle_pncp_compra BIGINT,
-    numero_controle_pncp BIGINT,
-    ano_contrato TIMESTAMP,
-    data_assinatura TIMESTAMP,
-    data_vigencia_inicio TIMESTAMP,
-    data_vigencia_fim TIMESTAMP,
+    numero_controle_pncp_compra UHUGEINT,
+    numero_controle_pncp UHUGEINT UNIQUE,
+    ano_contrato INT,
+    data_assinatura DATETIME,
+    data_vigencia_inicio DATETIME,
+    data_vigencia_fim DATETIME,
     data_publicacao_pncp TIMESTAMP,
     processo VARCHAR,
     objeto_contrato VARCHAR,
@@ -48,7 +48,8 @@ CREATE TABLE IF NOT EXISTS informacao_contrato(
     data_atualizacao_global TIMESTAMP,
     identificar_cipi VARCHAR, --Verificar
     url_cipi VARCHAR,
-    usuario_nome VARCHAR
+    usuario_nome VARCHAR,
+    numero_controle_pncp UHUGEINT REFERENCES contrato_pncp(numero_controle_pncp)
 
 );
 
@@ -61,6 +62,8 @@ CREATE TABLE IF NOT EXISTS unidade_orgao(
     uf VARCHAR,
     sigla_uf VARCHAR,
     municipio VARCHAR,
+    numero_controle_pncp UHUGEINT REFERENCES contrato_pncp(numero_controle_pncp)
+    
 
 );
 CREATE TABLE IF NOT EXISTS unidade_subrogada(
@@ -70,6 +73,7 @@ CREATE TABLE IF NOT EXISTS unidade_subrogada(
     uf VARCHAR,
     sigla_uf VARCHAR,
     municipio VARCHAR,
+    numero_controle_pncp UHUGEINT REFERENCES contrato_pncp(numero_controle_pncp)
     
 );
 
@@ -77,26 +81,30 @@ CREATE TABLE IF NOT EXISTS fornecedor(
     tipo_pessoa VARCHAR,
     codigo_pais VARCHAR,
     nome VARCHAR,
-    cnpj BIGINT
+    cnpj BIGINT,
+    numero_controle_pncp UHUGEINT REFERENCES contrato_pncp(numero_controle_pncp)
 
 );
 
 
 CREATE TABLE IF NOT EXISTS fornecedor_sub(
     nome VARCHAR,
-    cnpj BIGINT
+    cnpj BIGINT,
+    numero_controle_pncp UHUGEINT REFERENCES contrato_pncp(numero_controle_pncp)
 );
 
 CREATE TABLE IF NOT EXISTS orgao(
     orgao VARCHAR,
     cnpj BIGINT,
     poder_id INT REFERENCES esfera_poder(esfera_poder_id),
-    esfera_id INT REFERENCES esfera_adm(esfera_adm_id)
+    esfera_id INT REFERENCES esfera_adm(esfera_adm_id),
+    numero_controle_pncp UHUGEINT REFERENCES contrato_pncp(numero_controle_pncp)
 );
 
 CREATE TABLE IF NOT EXISTS orgao_subrogado(
     orgao VARCHAR,
     cnpj BIGINT,
     poder_id INT REFERENCES esfera_poder(esfera_poder_id),
-    esfera_id INT REFERENCES esfera_adm(esfera_adm_id)
+    esfera_id INT REFERENCES esfera_adm(esfera_adm_id),
+    numero_controle_pncp UHUGEINT REFERENCES contrato_pncp(numero_controle_pncp)
 );

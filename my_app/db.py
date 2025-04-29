@@ -46,3 +46,21 @@ def init_app(app):
     app.cli.add_command(init_db_command)
 
 
+import pandas as pd
+
+def alterar_id(df):
+    # Obtenha os valores únicos da coluna 'orgaoEntidade.esferaId'
+    valores_unicos = df['orgaoEntidade.esferaId'].unique()
+
+    # Inicialize o iterável para a substituição
+    iteravel = 0
+
+    # Para cada valor único, substitua no DataFrame
+    for item in valores_unicos:
+        df['orgaoEntidade.esferaId'] = df['orgaoEntidade.esferaId'].replace(item, iteravel)
+        iteravel += 1
+
+    # Imprimir o iterável após a execução
+    print(iteravel)
+
+    return df
