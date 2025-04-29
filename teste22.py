@@ -1,6 +1,6 @@
 import duckdb 
 
-caminho = r"Y:\database_siga\teste.duckdb2"
+caminho = r"Y:\database_siga\teste.duckdb"
 
 conn = duckdb.connect(caminho)
 

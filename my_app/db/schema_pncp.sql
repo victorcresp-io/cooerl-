@@ -44,7 +44,7 @@ CREATE TABLE IF NOT EXISTS informacao_contrato(
     numero_alteracao_pncp INT, -- Quantidade de vezes que o registro foi alterado no PNCP
     tipo_contrato_id INT REFERENCES tipo_contrato(tipo_contrato_id),
     categoria_processo_id INT REFERENCES categoria_processo(categoria_processo_id),
-    empenho_contrato INT,
+    empenho_contrato VARCHAR,
     data_atualizacao_global TIMESTAMP,
     identificar_cipi VARCHAR, --Verificar
     url_cipi VARCHAR,
