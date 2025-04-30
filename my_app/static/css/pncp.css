@@ -87,3 +87,56 @@ button[type="submit"]:hover {
 }
 
 
+.resumo-container {
+    margin-top: 20px;
+    background-color: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    position: relative;
+}
+
+#resumo-box {
+    display: block;
+}
+
+button.close-btn {
+    background-color: transparent;
+    border: none;
+    color: #333;
+    font-size: 20px;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    cursor: pointer;
+}
+
+button.close-btn:hover {
+    color: #c82333;
+}
+
+.resumo-content p {
+    font-size: 16px;
+    margin: 10px 0;
+}
+
+
+
+.download-container {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.btn-download {
+    padding: 12px 30px;
+    background-color: #28a745;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.btn-download:hover {
+    background-color: #218838;
+}

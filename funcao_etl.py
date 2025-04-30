@@ -12,6 +12,7 @@ def inserir_dados_fornecedor(con, df):
             COALESCE(TRY_CAST(niFornecedor AS BIGINT), 0),
             numeroControlePNCP
             
+            
         FROM df
 """)
 
@@ -19,7 +20,8 @@ def inserir_dados_fornecedor_sub(con, df):
     con.execute("""INSERT INTO fornecedor_sub BY POSITION 
         SELECT
             nomeFornecedorSubContratado,
-            COALESCE(TRY_CAST(niFornecedorSubContratado AS BIGINT), 0)
+            COALESCE(TRY_CAST(niFornecedorSubContratado AS BIGINT), 0),
+            numeroControlePNCP
         FROM df
 """)
 
@@ -29,8 +31,9 @@ def inserir_dados_orgao(con, df):
         SELECT
             orgaoEntidade_razaoSocial,
             orgaoEntidade_cnpj,
-            orgaoEntidade.poderId,
-            orgaoEntidade.esferaId
+            orgaoEntidade_poderId,
+            orgaoEntidade_esferaId,
+            numeroControlePNCP
         FROM df
             
 """)
@@ -39,10 +42,11 @@ def inserir_dados_orgao_subrogado(con, df):
     con.execute("""
     INSERT INTO orgao_subrogado BY POSITION
         SELECT
-            orgaoSubRogado.razaoSocial,
-            orgaoSubRogado.cnpj,
-            orgaoSubRogado.poderId,
-            orgaoSubRogado.esferaId
+            orgaoSubRogado_razaoSocial,
+            orgaoSubRogado_cnpj,
+            orgaoSubRogado_poderId,
+            orgaoSubRogado_esferaId,
+            numeroControlePNCP
         FROM df
 """)
     
@@ -50,12 +54,12 @@ def inserir_dados_unidade_orgao(con, df):
     con.execute("""
     INSERT INTO unidade_orgao BY POSITION
         SELECT
-            unidadeOrgao.nomeUnidade,
-            unidadeOrgao.codigoIbge,
-            unidadeOrgao.codigoUnidade,
-            unidadeOrgao.ufNome,
-            unidadeOrgao.ufSigla,
-            unidadeOrgao.municipioNome
+            unidadeOrgao_nomeUnidade,
+            unidadeOrgao_codigoIbge,
+            unidadeOrgao_codigoUnidade,
+            unidadeOrgao_ufNome,
+            unidadeOrgao_ufSigla,
+            unidadeOrgao_municipioNome
         FROM df
 """)
     
@@ -63,13 +67,13 @@ def inserir_dados_unidade_orgao_subrogada(con, df):
     con.execute("""
     INSERT INTO unidade_subrogada BY POSITION
         SELECT
-            unidadeSubRogada.nomeUnidade,
-            unidadeSubRogada.codigoIbge,
-            unidadeSubRogada.codigoUnidade,
-            unidadeSubRogada.ufNome
-            unidadeSubRogada.ufSigla,
-            unidadeOrgao.ufSigla,
-            unidadeSubRogada.municipioNome
+            unidadeSubRogada_nomeUnidade,
+            unidadeSubRogada_codigoIbge,
+            unidadeSubRogada_codigoUnidade,
+            unidadeSubRogada_ufNome
+            unidadeSubRogada_ufSigla,
+            unidadeOrgao_ufSigla,
+            unidadeSubRogada_municipioNome
         FROM df
 """)
     
@@ -98,8 +102,8 @@ def tipo_contrato(con, df):
     con.execute("""
     INSERT INTO tipo_contrato BY POSITION
         SELECT
-            tipoContrato.id,
-            tipoContrato.nome
+            tipoContrato_id,
+            tipoContrato_nome
         FROM df
 """)
     
@@ -108,8 +112,8 @@ def esfera_poder(con, df):
     con.execute("""
     INSERT INTO esfera_poder BY POSITION
         SELECT
-            orgaoEntidade.poderId,
-            tipoContrato.nome
+            orgaoEntidade_poderId,
+            tipoContrato_nome
         FROM df
 """)
     
@@ -154,6 +158,10 @@ def tratar_dados(df):
     print('df antes da remoção de duplicadas')
     print(df.info())
     df = df.drop_duplicates()
-    print('df depois das duplicas')
+    print('df depois das duplicadass')
     print(df.info())
+    df['orgaoEntidade_poderId'] = df['orgaoEntidade_poderId'].replace({'L': 1, 'E': 2, 'J': 3, 'N': 4})
+    df['orgaoEntidade_esferaId'] = df['orgaoEntidade_esferaId'].replace({'F': 1, 'E': 2, 'M': 3, 'D': 4, 'N': 5 })
+    df['orgaoSubRogado_esferaId'] = df['orgaoSubRogado_esferaId'].replace({'F': 1, 'E': 2, 'M': 3, 'D': 4, 'N': 5 })
+    df['orgaoSubRogado_poderId'] = df['orgaoSubRogado_poderId'].replace({'L': 1, 'E': 2, 'J': 3, 'N': 4})
     return df

@@ -2,8 +2,9 @@ from flask import Blueprint, request, send_file, render_template, flash, redirec
 from my_app.db import get_db, get_db2
 from my_app.funcao_buscadb import buscar_compras, ultima_compra_direta, ultima_compra_outra, buscar_compras_cnpj, ultima_compra_direta_cnpj, ultima_compra_outra_cnpj, comparar_data, consulta_contratos, consulta_fornecedores, consulta_compras_diretas, consulta_outras_compras
 from my_app.funcao_fornecedores import tratar_cnpj, tratar_empresa
-from my_app.funcao_pncp import buscar_pncp_termo
+from my_app.funcao_pncp import buscar_dados_pncp, buscar_dados_pncp_excel
 import pandas as pd
+import duckdb
 from io import BytesIO
 import time
 from datetime import datetime
@@ -252,28 +253,27 @@ def excel_download_acompanhamento():
 
 @bp.route('/financeiro_siga', methods = ['POST', 'GET'])
 def financeiro_siga():
-    data_inicio = '01/01/2024'
-    data_fim = '15/04/2025'
-    data_inicio_att = datetime.strptime(data_inicio, '%d/%m/%Y').year
-    data_fim_att = datetime.strptime(data_fim, '%d/%m/%Y').year
-    termo = request.form.get('busca')
+    total_pncp = ' '
+    termo = request.form.get('termo')
+    con = get_db2()
+    print(termo)
     if request.method == 'POST':
-        buscar_pncp_termo(termo, data_inicio_att, data_fim_att)
-        print(termo)
+        total_pncp = buscar_dados_pncp(con, termo)
+        print(total_pncp)
+        return render_template('pncp.html', total_pncp = total_pncp, termo = termo)
     return render_template('pncp.html')
 
 @bp.route('/excel_download_pncp')
 def excel_download_pncp():
     con = get_db2()
-
-    resultado_df = con.execute("SELECT * FROM teste_pncp").df()
+    termo = request.args.get('termo', '')
+    resultado_df = buscar_dados_pncp_excel(con, termo)
     print(resultado_df.info())
     
     buffer = BytesIO()
     with pd.ExcelWriter(buffer, engine = 'openpyxl') as writer:
         resultado_df.to_excel(writer, index = False, sheet_name = 'Contratos-PNCP')
     buffer.seek(0)
-    con.execute('TRUNCATE teste_pncp')
     return send_file(
         buffer,
         as_attachment=True,

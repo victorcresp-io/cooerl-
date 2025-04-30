@@ -8,27 +8,13 @@
 </head>
 <body>
     <div class="container">
-        <!-- Exibir as mensagens de flash (se existirem) -->
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                <ul>
-                    {% for category, message in messages %}
-                        <li class="flash-message {% if category == 'error' %}error-message{% else %}success-message{% endif %}">
-                            {{ message }}
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% endif %}
-        {% endwith %}
-
-        <!-- Formulário -->
         <div class="form-container">
             <h2>Consulta PNCP</h2>
 
-            <form  action="{{ url_for('siga.fornecedores', _external=True) }}" method="POST">
+            <form  action="{{ url_for('siga.financeiro_siga', _external=True) }}" method="POST">
                 <label for="nome">Pesquise no PNCP:</label>
                 <div class="ajustando-sugestoes">
-                    <input class="teste" type="text" id="nome" name="empresa" placeholder="Digite o termo chave" style="width: 100%;">
+                    <input class="teste" type="text" id="nome" name="termo" placeholder="Digite o termo chave" style="width: 100%;">
                     <div id="suggestions" class="suggestions-box"></div>
                 </div>
                 
@@ -37,8 +23,24 @@
                 <a href="{{ url_for('hello', _external=True) }}" class="back-button">Voltar ao Menu</a>
             </form>
 
-    
-
     </div>
+
+    {% if total_pncp %}
+    <div id="resumo-box" class="resumo-container">
+        <button class="close-btn" onclick="document.getElementById('resumo-box').style.display='none';">✖</button>
+        <h4>Total de contratos encontrados com o termo <strong>'{{termo}}'</strong></h4>
+        <div class="resumo-content">
+            <p><strong>Total de contratos encontrados:</strong> {{ total_pncp }}</p>
+        </div>
+
+        <!-- Botão para baixar o Excel -->
+        <div class="download-container">
+            <a href="{{ url_for('siga.excel_download_pncp', termo = termo) }}" class="btn-download">
+                Baixar Excel
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
 </body>
 </html>
