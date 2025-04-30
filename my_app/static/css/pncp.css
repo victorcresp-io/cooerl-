@@ -8,8 +8,33 @@ body {
     align-items: center;
     min-height: 100vh;
 }
+
+.container {
+    width: 100%;
+    max-width: 960px;
+    margin: 20px auto;
+}
+
+/* Formulário */
+.form-container {
+    background-color: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+label {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 5px;
+    display: block;
+    text-align: left;
+}
+
+
+
 .centralizar{
-    min-width: 60%;
+    width: 100%;
     height: 300px;
     display: flex;
     align-items: center;
@@ -18,37 +43,47 @@ body {
     background-color: white;
 }
 
-.pesquisa-termo{
-    display: flex;
-    flex-direction: column;
-    min-width: 30%;
-    gap: 8px;
-    font-size: 20px;
-}
-
-.input-termo{
-    padding: 5px;
-}
-.ajustar-caixa-filtro{
-    display: flex;
-    flex-direction: column;
-}
-
-.opcao-filtro{
-    margin-top: 15px;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-    height: 100%;
+input[type="text"] {
     width: 100%;
+    padding: 12px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 16px;
+    box-sizing: border-box;
 }
 
-h4{
-    margin: 0;
-    margin-left: 3px;
+button[type="submit"] {
+    width: 100%;
+    padding: 12px;
+    background-color: #0056b3;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
 }
-.ajuste-input{
-    transform: scale(1.5); /* aumenta o tamanho visual da bolinha */
-    margin-right: 8px;     /* espaçamento entre bolinha e texto */
-    cursor: pointer;      
+
+button[type="submit"]:hover {
+    background-color: #004080;
 }
+
+
+.back-button {
+    width: 100%;
+    display: block;
+    text-align: center;
+    box-sizing: border-box;
+    background-color: #555;
+    color: white;
+    padding: 12px;
+    border-radius: 6px;
+    text-decoration: none;
+    margin-top: 10px;
+}
+
+.back-button:hover {
+    background-color: #444;
+}
+
+

@@ -7,29 +7,38 @@
     <title>Document</title>
 </head>
 <body>
-    <div class="centralizar">
+    <div class="container">
+        <!-- Exibir as mensagens de flash (se existirem) -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul>
+                    {% for category, message in messages %}
+                        <li class="flash-message {% if category == 'error' %}error-message{% else %}success-message{% endif %}">
+                            {{ message }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
 
-           <form class="pesquisa-termo" action="{{url_for('siga.financeiro_siga')}}" method="post">
-            <label for="busca">Insira o termo chave</label>
-            <input class="input-termo" type="text" id="busca" name="busca" placeholder="Digite um termo">
-            <button type="submit">Enviar</button>
-           </form>
+        <!-- Formulário -->
+        <div class="form-container">
+            <h2>Consulta PNCP</h2>
+
+            <form  action="{{ url_for('siga.fornecedores', _external=True) }}" method="POST">
+                <label for="nome">Pesquise no PNCP:</label>
+                <div class="ajustando-sugestoes">
+                    <input class="teste" type="text" id="nome" name="empresa" placeholder="Digite o termo chave" style="width: 100%;">
+                    <div id="suggestions" class="suggestions-box"></div>
+                </div>
+                
+
+                <button type="submit">Enviar</button>
+                <a href="{{ url_for('hello', _external=True) }}" class="back-button">Voltar ao Menu</a>
+            </form>
+
     
 
-        <div class="ajustar-caixa-filtro">
-            <div>
-                <h4>Modalidade</h4>
-            </div>
-
-            <div class="opcao-filtro">
-                <label><input class="ajuste-input" type="radio" name="fruta" value="maçã"> teste1</label>
-                <label><input class="ajuste-input" type="radio" name="fruta" value="maçã"> teste2</label>
-                <label><input class="ajuste-input" type="radio" name="fruta" value="maçã"> teste3</label>
-            </div>
-
-            <a href="{{url_for('siga.excel_download_pncp')}}">Baixar Excel</a>
-
-        </div>
     </div>
 </body>
 </html>

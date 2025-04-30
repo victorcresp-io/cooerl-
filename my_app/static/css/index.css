@@ -9,6 +9,7 @@ body {
     height: 100vh;
 }
 
+
 .menu-container {
     background-color: rgba(255, 255, 255, 0.8); /* Fundo semi-transparente */
     padding: 20px;
@@ -18,10 +19,11 @@ body {
 }
 
 .menu-title {
-    font-size: 24px; /* Tamanho do título */
-    margin-bottom: 20px; /* Espaço abaixo do título */
+    font-size: 21px; /* Tamanho do título */
+    margin-bottom: 30px; /* Espaço abaixo do título */
     color: #333; /* Cor do texto */
     font-weight: bold; /* Negrito para destaque */
+    text-transform: uppercase;
 }
 
 .menu {
