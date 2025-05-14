@@ -1,0 +1,17 @@
+import re
+import unicodedata
+
+def remover_acentos(texto: str) -> str:
+    """
+    Normaliza uma string a transformando em bytes e depois ignorando acentos
+    e a convertendo para string normal.
+    """
+
+    texto = unicodedata.normalize('NFD', texto)
+    textoSemAcento = texto.encode('ascii', 'ignore').decode('utf-8')
+    return textoSemAcento
+
+
+
+
+
