@@ -11,7 +11,10 @@ def remover_acentos(texto: str) -> str:
     textoSemAcento = texto.encode('ascii', 'ignore').decode('utf-8')
     return textoSemAcento
 
+def normalizar_espacos(texto: str) -> str:
+    """
+    Substitui espaços extras por apenas um espaço
+    """
 
-
-
-
+    textoSemEspaçoExtras = re.sub(r'\s+', ' ', texto)
+    return textoSemEspaçoExtras
