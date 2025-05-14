@@ -6,3 +6,5 @@ __pycache__
 freeze
 teste_sql.py
 FORNECEDOR_SANCOES.CSV
+FORNECEDORES (1).CSV
+funcao_etl.py

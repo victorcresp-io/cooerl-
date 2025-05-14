@@ -35,7 +35,7 @@ def buscar_compras(empresa, data, cursor):
     print(f'Tempo gasto na função BUSCAR_COMPRAS: {tempo:.6f} segundos')              
     return total_diretas, total_outras, resultado_contratos
 
-def ultima_compra_direta(cursor, empresa, data, total):
+def ultima_compra_direta(cursor, empresa, data):
     
     cursor.execute("SELECT data_aprovacao, id_processo FROM compras_diretas WHERE (data_adicao = ? AND fornecedor_vencedor = ?) ORDER BY data_aprovacao DESC LIMIT 1", (data, empresa))
     res = cursor.fetchone()
@@ -45,7 +45,7 @@ def ultima_compra_direta(cursor, empresa, data, total):
 
 
 
-def ultima_compra_outra(cursor, empresa, data, total):
+def ultima_compra_outra(cursor, empresa, data):
     print('Iniciando a busca pela última compra usando empresa como parâmetro')
     cursor.execute("SELECT data_aprovacao, id_processo FROM outras_compras WHERE (data_adicao = ? AND fornecedor_vencedor = ?) ORDER BY data_aprovacao DESC LIMIT 1", (data, empresa))
     res = cursor.fetchone()

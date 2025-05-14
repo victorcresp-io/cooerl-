@@ -1,6 +1,7 @@
 from flask import Blueprint, request, send_file, render_template, flash, redirect, url_for, jsonify
 from my_app.db import get_db, get_db2
-from my_app.funcao_buscadb import buscar_compras, ultima_compra_direta, ultima_compra_outra, buscar_compras_cnpj, ultima_compra_direta_cnpj, ultima_compra_outra_cnpj, comparar_data, consulta_contratos, consulta_fornecedores, consulta_compras_diretas, consulta_outras_compras
+from my_app.funcao_buscadb import   (buscar_compras, ultima_compra_direta, ultima_compra_outra,
+                                    buscar_compras_cnpj, ultima_compra_direta_cnpj, ultima_compra_outra_cnpj, comparar_data, consulta_contratos, consulta_fornecedores, consulta_compras_diretas, consulta_outras_compras)
 from my_app.funcao_fornecedores import tratar_cnpj, tratar_empresa
 from my_app.funcao_pncp import buscar_dados_pncp, buscar_dados_pncp_excel
 import pandas as pd
@@ -20,23 +21,18 @@ def rota():
 
 @bp.route('/fornecedores', methods=['GET', 'POST'])
 def fornecedores():
-    resumo = None
-    empresa_db = None
-    situacao = None
-    empresa_filtro = None
-    cnpj_db = None
     data = '22/03/2025'
     data = datetime.strptime(data, '%d/%m/%Y').date()
     time_inicio = time.time()
 
     """ Rota para processar a requisição e redirecionar para o download """
     if request.method == 'POST':
-        empresa_filtro = request.form.get('empresa')
-        empresa_filtro = tratar_empresa(empresa_filtro)
-        cnpj_filtro = request.form.get('cnpj')
-        cnpj_filtro = tratar_cnpj(cnpj_filtro)
-        print(f'Empresa recebida no formulário: {empresa_filtro}')
-        print(f'CNPJ recebido no formulário: {cnpj_filtro}')
+        getEmpresa = request.form.get('empresa')
+        getCnpj = request.form.get('cnpj')
+        empresaTratada = tratar_empresa(getEmpresa)
+        cnpjTratado = tratar_cnpj(getCnpj)
+        print(f'Empresa recebida no formulário: {empresaTratada}')
+        print(f'CNPJ recebido no formulário: {cnpjTratado}')
 
         #Verificando se a empresa está na base FORNECEDORES.
         db = get_db()
@@ -45,14 +41,11 @@ def fornecedores():
         print('Conexão com banco de dados feita com sucesso!')
         print('Data usada como parâmetro: ', data)
         try:
-            cursor.execute('SELECT cpf_cnpj, situacao FROM fornecedores WHERE fornecedor = ? AND data_adicao = ?' , (empresa_filtro, data))
-            resultado = cursor.fetchone()
-            cnpj_db, situacao = resultado
-            print(f'Tudo ok por aqui. CNPJ_DB : {cnpj_db} e a situação é {situacao}')
-
-            if cnpj_db:
-
-                resultado = buscar_compras_cnpj(cursor, cnpj_db, data)
+            if not empresaTratada:
+                cursor.execute('SELECT fornecedor, situacao FROM fornecedores WHERE cpf_cnpj = ? AND data_adicao = ?' , (cnpjTratado, data))
+                fornecedorAndSituacao = cursor.fetchone()
+                fornecedor, situacaoFornecedor = fornecedorAndSituacao
+                resultado = buscar_compras_cnpj(cursor, cnpjTratado, data)
                 total_compras_diretas = resultado[0]
                 total_outras_compras = resultado[1]
                 total_contratos = resultado[2]
@@ -60,8 +53,8 @@ def fornecedores():
 
 
                 resumo = {
-                        'empresa': empresa_filtro,
-                        'situacao': situacao,
+                        'empresa': fornecedor,
+                        'situacao': situacaoFornecedor,
                         'total_compras_diretas': total_compras_diretas,
                         'total_outras_compras': total_outras_compras,
                         'total_contratos': total_contratos,
@@ -72,43 +65,45 @@ def fornecedores():
 
                 tempo_total = tempo2 - tempo1
                 print(f'Tempo total gasto foi de {tempo_total:.6f}')
-            else:
-
-                resultado = buscar_compras(empresa_filtro, data, cursor)
-                data_ultima_compra_direta = ultima_compra_direta(cursor, empresa_filtro, data)
-                data_ultima_compra_outra = ultima_compra_outra(cursor, empresa_filtro, data)
-
-                total_compras_diretas, total_outras_compras, total_contratos = resultado
-                data_ultima_direta, processo_ultima_direta =data_ultima_compra_direta
-                data_ultima_outra, processo_ultima_outra = data_ultima_compra_outra
-
-                data_recente = comparar_data(data_ultima_direta, data_ultima_outra)
+                return render_template('fornecedores.html', resumo = resumo)
 
 
-                resumo = {
-                        'empresa': empresa_db,
-                        'situacao': situacao,
-                        'total_compras_diretas': total_compras_diretas,
-                        'total_outras_compras': total_outras_compras,
-                        'total_contratos': total_contratos,
-                        'ultima_compra': data_recente
-                        }
-                print('Resumo feito')    
+            cursor.execute('SELECT cpf_cnpj, situacao FROM fornecedores WHERE fornecedor = ? AND data_adicao = ?' , (empresaTratada, data))
+            resultado = cursor.fetchone()               
+            getCnpjFromDatabase, situacaoFornecedor = resultado
+            print(f'Tudo ok por aqui. CNPJ_DB : {getCnpjFromDatabase} e a situação é {situacaoFornecedor}')
+
+
+            resultado = buscar_compras(empresaTratada, data, cursor)
+            data_ultima_compra_direta = ultima_compra_direta(cursor, empresaTratada, data)
+            data_ultima_compra_outra = ultima_compra_outra(cursor, empresaTratada, data)
+
+            total_compras_diretas, total_outras_compras, total_contratos = resultado
+            data_ultima_direta, processo_ultima_direta =data_ultima_compra_direta
+            data_ultima_outra, processo_ultima_outra = data_ultima_compra_outra
+
+            data_recente = comparar_data(data_ultima_direta, data_ultima_outra)
+
+
+            resumo = {
+                    'empresa': empresaTratada,
+                    'situacao': situacaoFornecedor,
+                    'total_compras_diretas': total_compras_diretas,
+                    'total_outras_compras': total_outras_compras,
+                    'total_contratos': total_contratos,
+                    'ultima_compra': data_recente
+                    }
+            print('Resumo feito')    
+            return render_template('fornecedores.html', resumo = resumo)
 
         except Exception as e:
             flash('Empresa não encontrada, verifique o nome ou cnpj', category= 'error')
-        
+            print(e)        
 
                 
-            return render_template('fornecedores.html', resumo = resumo, empresa_filtro = empresa_filtro, cnpj_filtro = cnpj_db)
-        except Exception as e:
-            print('Aconteceu o seguinte erro:', e)
-
-
-    
-    print('até aqui ok', empresa_filtro)
-
-    return render_template('fornecedores.html', resumo = resumo, empresa_filtro = empresa_filtro, cnpj_filtro = cnpj_db, data_recente = data)
+            return render_template('fornecedores.html')
+        
+    return render_template('fornecedores.html')
 
 
 @bp.route('/get_fornecedores', methods=['GET'])
