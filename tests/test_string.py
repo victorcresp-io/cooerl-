@@ -12,5 +12,5 @@ def test_stringSemAcento():
 
 
 def test_normalizarEspacos():
-    resultado = normalizar_espacos('Teste   Supremo')
-    assert resultado == 'Teste Supremo'
+    resultado = normalizar_espacos(' Teste   de  espaço extras   ')
+    assert resultado == 'Teste de espaço extras'
