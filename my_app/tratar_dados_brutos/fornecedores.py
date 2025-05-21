@@ -1,5 +1,6 @@
 import re
 import unicodedata
+from typing import List
 
 def remover_acentos(texto: str) -> str:
     """
@@ -18,3 +19,12 @@ def normalizar_espacos(texto: str) -> str:
 
     textoSemEspaçoExtras = re.sub(r'\s+', ' ', texto).strip()
     return textoSemEspaçoExtras
+
+
+def normalizar_colunas(colunas: str) -> str:
+    """ Função para normalizar todas as colunas da base fornecedores """
+
+    colunaSemaAcento = remover_acentos(colunas).lower()
+    colunaSemEspaçoExtras = normalizar_espacos(colunaSemaAcento)
+    colunaFormatadaFinal = re.sub(r'[ /]', '_', colunaSemEspaçoExtras)
+    return colunaFormatadaFinal
