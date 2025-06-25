@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de Empresa</title>
+    <link rel="stylesheet" href="/static/css/fornecedores.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Exibir as mensagens de flash (se existirem) -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul>
+                    {% for category, message in messages %}
+                        <li class="flash-message {% if category == 'error' %}error-message{% else %}success-message{% endif %}">
+                            {{ message }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Formulário -->
+        <div class="form-container">
+            <h2>Preencha o Formulário</h2>
+
+            <form  action="{{ url_for('siga.fornecedores', _external=True) }}" method="POST">
+                <label for="nome">Nome:</label>
+                <div class="ajustando-sugestoes">
+                    <input class="teste" type="text" id="nome" name="empresa" placeholder="Digite o nome da empresa" style="width: 100%;">
+                    <div id="suggestions" class="suggestions-box"></div>
+                </div>
+                
+                
+                <label id = 'modificando' for="cnpj">CNPJ:</label>
+                <input type="text" id="cnpj" name="cnpj" placeholder="Digite o CNPJ da empresa">
+
+                <button type="submit">Enviar</button>
+                <a href="{{ url_for('hello', _external=True) }}" class="back-button">Voltar ao Menu</a>
+            </form>
+
+            <!-- Caixa de Sugestões (adicionada ao HTML) -->
+        </div>
+
+        <!-- Resumo da Empresa -->
+        {% if resumo %}
+        <div id="resumo-box" class="resumo-container">
+            <button class="close-btn" onclick="document.getElementById('resumo-box').style.display='none';">✖</button>
+            <h3>Resumo da Empresa</h3>
+            <div class="resumo-content">
+                <p><strong>Empresa:</strong> {{ resumo.empresa }}</p>
+                <p><strong>Situação:</strong> <span class="status">{{ resumo.situacao }}</span></p>
+                <p><strong>Total de Contratos:</strong> {{ resumo.total_contratos }}</p>
+                <p><strong>Total de Compras Diretas:</strong> {{ resumo.total_compras_diretas }}</p>
+                <p><strong>Total de Outras Compras:</strong> {{ resumo.total_outras_compras }}</p>
+                <p><strong>Total de Licitações:</strong> {{ resumo.total_outras_compras }}</p>
+                <p><strong>Total de Sanções:</strong> {{ resumo.total_outras_compras }}</p>
+                <p><strong>Última Compra:</strong> {{ resumo.ultima_compra }}</p>
+            </div>
+
+            <!-- Botão para baixar o Excel -->
+            <div class="download-container">
+                <a href="{{ url_for('siga.excel_download', empresa_filtro = resumo.empresa, cnpj_filtro = cnpj_filtro, data_recente = data_recente) }}" class="btn-download">
+                    Baixar Excel
+                </a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const nomeInput = document.getElementById("nome");
+            const suggestionsBox = document.getElementById("suggestions");
+
+            nomeInput.addEventListener("input", function () {
+                const termo = nomeInput.value.trim();
+
+                if (termo.length < 3) {
+                    suggestionsBox.style.display = "none"; 
+                    return;
+                }
+                console.log("Termo de busca:", termo);
+
+                fetch(`get_fornecedores?termo=${termo}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        suggestionsBox.innerHTML = "";
+                        if (data.length === 0) {
+                            suggestionsBox.style.display = "none";
+                            return;
+                        }
+
+                        data.forEach(nome => {
+                            let item = document.createElement("div");
+                            item.textContent = nome;
+                            item.classList.add("suggestion-item");
+
+                            item.addEventListener("click", function () {
+                                nomeInput.value = nome;
+                                suggestionsBox.style.display = "none";
+                            });
+
+                            suggestionsBox.appendChild(item);
+                        });
+
+                        suggestionsBox.style.display = "block";
+                    })
+                    .catch(error => console.error("Erro ao buscar fornecedores:", error));
+            });
+
+            // Esconde a caixa de sugestões se clicar fora
+            document.addEventListener("click", function (event) {
+                if (!suggestionsBox.contains(event.target) && event.target !== nomeInput) {
+                    suggestionsBox.style.display = "none";
+                }
+            });
+        });
+    </script>
+</body>
+</html>
