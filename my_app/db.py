@@ -6,7 +6,7 @@ import duckdb
 
 caminho2 = r"Y:\database_siga\banco_de_dados.duckdb"
 def get_db2():
-    conexao = duckdb.connect('banco.duckdb4')
+    conexao = duckdb.connect(caminho2)
     return conexao
 def get_db():
     if 'db' not in g:

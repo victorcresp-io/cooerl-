@@ -25,12 +25,14 @@
 
     </div>
 
-    {% if total_pncp %}
+    {% if total_contratos %}
     <div id="resumo-box" class="resumo-container">
         <button class="close-btn" onclick="document.getElementById('resumo-box').style.display='none';">✖</button>
         <h4>Total de contratos encontrados com o termo <strong>'{{termo}}'</strong></h4>
         <div class="resumo-content">
-            <p><strong>Total de contratos encontrados:</strong> {{ total_pncp }}</p>
+            <p><strong>Total de contratos encontrados:</strong> {{ total_contratos }}</p>
+            <p><strong>Total de atas encontradas:</strong> {{ total_atas }}</p>
+            <p><strong>Total de contratações encontradas:</strong> {{ total_contratacoes }}</p>
         </div>
 
         <!-- Botão para baixar o Excel -->

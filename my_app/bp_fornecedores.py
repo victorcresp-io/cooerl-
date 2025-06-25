@@ -3,7 +3,7 @@ from my_app.db import get_db, get_db2
 from my_app.funcao_buscadb import   (buscar_compras, ultima_compra_direta, ultima_compra_outra,
                                     buscar_compras_cnpj, ultima_compra_direta_cnpj, ultima_compra_outra_cnpj, comparar_data, consulta_contratos, consulta_fornecedores, consulta_compras_diretas, consulta_outras_compras)
 from my_app.funcao_fornecedores import tratar_cnpj, tratar_empresa
-from my_app.funcao_pncp import buscar_dados_pncp, buscar_dados_pncp_excel
+from my_app.funcao_pncp import filtrar_contrato
 import pandas as pd
 import duckdb
 from io import BytesIO
@@ -248,26 +248,31 @@ def excel_download_acompanhamento():
 
 @bp.route('/financeiro_siga', methods = ['POST', 'GET'])
 def financeiro_siga():
-    total_pncp = ' '
     termo = request.form.get('termo')
     con = get_db2()
     print(termo)
     if request.method == 'POST':
-        total_pncp = buscar_dados_pncp(con, termo)
-        print(total_pncp)
-        return render_template('pncp.html', total_pncp = total_pncp, termo = termo)
+        df_contratos, df_atas, df_contratacoes = filtrar_contrato(con, termo)
+        total_contratos = len(df_contratos)
+        total_atas = len(df_atas)
+        total_contratacoes = len(df_contratacoes)
+        print(total_contratos)
+        print(total_atas)
+        print()
+        return render_template('pncp.html', total_contratos = total_contratos, total_atas = total_atas, total_contratacoes = total_contratacoes, termo = termo)
     return render_template('pncp.html')
 
 @bp.route('/excel_download_pncp')
 def excel_download_pncp():
     con = get_db2()
     termo = request.args.get('termo', '')
-    resultado_df = buscar_dados_pncp_excel(con, termo)
-    print(resultado_df.info())
-    
+    df_contratos, df_atas, df_contratacoes = filtrar_contrato(con, termo)
+
     buffer = BytesIO()
     with pd.ExcelWriter(buffer, engine = 'openpyxl') as writer:
-        resultado_df.to_excel(writer, index = False, sheet_name = 'Contratos-PNCP')
+        df_contratos.to_excel(writer, sheet_name = "Contratos", index = False)
+        df_atas.to_excel(writer, sheet_name = "Atas", index = False)
+        df_contratacoes.to_excel(writer, sheet_name = "Contratações", index = False)  
     buffer.seek(0)
     return send_file(
         buffer,
