@@ -10,3 +10,4 @@ FORNECEDORES (1).CSV
 funcao_etl.py
 banco.duckdb4
 teste.py
+data_raw/
